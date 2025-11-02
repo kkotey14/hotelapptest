@@ -4,7 +4,8 @@ $host = 'localhost';
 $user = 'root';           // Replace with your DB user
 $pass = '';               // Replace with your DB password
 $dbName = 'hotelapp';
-$dumpFile = __DIR__ . '/schema_only.sql';
+$dumpFile = __DIR__ . '/schema_with_rooms.sql';
+
 
 
 try {
