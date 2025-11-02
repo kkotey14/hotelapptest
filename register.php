@@ -3,7 +3,7 @@ require 'db.php';
 require 'header.php';
 
 /**
- * Helper: check if a column exists (so we can insert address/dob only when present)
+ * Helper: check if a column exists in a table
  */
 function column_exists(PDO $pdo, string $table, string $column): bool {
   static $cache = [];
@@ -17,21 +17,21 @@ function column_exists(PDO $pdo, string $table, string $column): bool {
 
 $err = $ok = '';
 $values = [
-  'first_name' => '',
-  'last_name'  => '',
-  'email'      => '',
-  'address'    => '',
-  'dob'        => '',
+  'first_name'      => '',
+  'last_name'       => '',
+  'email'           => '',
+  'address'         => '',
+  'date_of_birth'   => '',
 ];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  // Collect & trim
+  // Collect inputs
   foreach ($values as $k => $_) {
     $values[$k] = trim($_POST[$k] ?? '');
   }
   $password = $_POST['password'] ?? '';
 
-  // Basic validation
+  // Validation
   if ($values['first_name'] === '' || $values['last_name'] === '' || $values['email'] === '' || $password === '') {
     $err = 'First name, last name, email and password are required.';
   } elseif (!filter_var($values['email'], FILTER_VALIDATE_EMAIL)) {
@@ -39,12 +39,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   } elseif (strlen($password) < 8) {
     $err = 'Password must be at least 8 characters.';
   } else {
-    // Validate DOB if provided (expecting HTML <input type="date"> -> Y-m-d)
+    // Validate date of birth
     $dobStore = null;
-    if ($values['dob'] !== '') {
-      $dt = DateTime::createFromFormat('Y-m-d', $values['dob']);
-      if (!$dt) {
-        $err = 'Date of birth must be a valid date.';
+    if ($values['date_of_birth'] !== '') {
+      $dt = DateTime::createFromFormat('Y-m-d', $values['date_of_birth']);
+      if (!$dt || $dt->format('Y-m-d') !== $values['date_of_birth']) {
+        $err = 'Please enter a valid date of birth.';
       } else {
         $dobStore = $dt->format('Y-m-d');
       }
@@ -52,38 +52,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   }
 
   if ($err === '') {
-    // Unique email?
+    // Check if email exists
     $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ?");
     $stmt->execute([$values['email']]);
     if ($stmt->fetch()) {
       $err = 'That email is already registered. Try signing in.';
     } else {
-      // Build name and hash
+      // Prepare INSERT
       $name = trim($values['first_name'] . ' ' . $values['last_name']);
       $hash = password_hash($password, PASSWORD_DEFAULT);
-
-      // Prepare dynamic insert (address/dob optional)
-      $cols = ['name','email','password_hash','role'];
+      
+      $cols = ['name', 'email', 'password_hash', 'role'];
       $params = [$name, $values['email'], $hash, 'customer'];
 
       if (column_exists($pdo, 'users', 'address')) {
         $cols[] = 'address';
         $params[] = $values['address'];
       }
-      if (column_exists($pdo, 'users', 'dob')) {
-        $cols[] = 'dob';
+      if (column_exists($pdo, 'users', 'date_of_birth')) {
+        $cols[] = 'date_of_birth';
         $params[] = $dobStore;
       }
 
-      $placeholders = '(' . implode(',', array_fill(0, count($cols), '?')) . ')';
-      $sql = 'INSERT INTO users (' . implode(',', $cols) . ') VALUES ' . $placeholders;
+      $sql = 'INSERT INTO users (' . implode(',', $cols) . ') VALUES (' . rtrim(str_repeat('?,', count($params)), ',') . ')';
       $ins = $pdo->prepare($sql);
       $ins->execute($params);
 
       $newId = $pdo->lastInsertId();
-      $ok = "Account created successfully. Your user ID is #{$newId}. You can now log in.";
-      // Clear form values after success
-      $values = ['first_name'=>'','last_name'=>'','email'=>'','address'=>'','dob'=>''];
+      $ok = "✅ Account created successfully. Your user ID is #{$newId}. You can now log in.";
+      $values = array_map(fn() => '', $values); // reset form
     }
   }
 }
@@ -127,11 +124,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <div class="grid" style="margin-bottom:10px">
         <div class="span-8">
           <label class="tiny muted">Address <span class="muted">(optional)</span></label>
-          <input class="input" name="address" value="<?= htmlspecialchars($values['address']) ?>" placeholder="Street, City, State, ZIP">
+          <input class="input" name="address" value="<?= htmlspecialchars($values['address']) ?>" placeholder="Street, City, ZIP">
         </div>
         <div class="span-4">
-          <label class="tiny muted">Date of birth <span class="muted">(optional)</span></label>
-          <input class="input" type="date" name="dob" value="<?= htmlspecialchars($values['dob']) ?>">
+          <label class="tiny muted">Date of Birth <span class="muted">(optional)</span></label>
+          <input class="input" type="date" name="date_of_birth" value="<?= htmlspecialchars($values['date_of_birth']) ?>">
         </div>
       </div>
 

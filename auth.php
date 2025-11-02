@@ -52,3 +52,19 @@ function require_role(array $roles) {
     exit;
   }
 }
+
+
+function require_role_admin($roles = []) {
+  if (!isset($_SESSION['user']) || empty($_SESSION['user']['role']) || !in_array($_SESSION['user']['role'], $roles)) {
+      // Pretty Forbidden page
+      http_response_code(403);
+      require 'header.php';
+      echo "<section class='container' style='padding:40px;text-align:center'>
+              <h1>403 – Forbidden</h1>
+              <p class='muted'>You do not have permission to access this page.</p>
+              <a href='index.php' class='btn' style='margin-top:20px'>Back to Home</a>
+            </section>";
+      require 'footer.php';
+      exit;
+  }
+}

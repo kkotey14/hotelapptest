@@ -1,25 +1,40 @@
 <?php
-require 'db.php'; require 'auth.php'; require_login();
-if (!in_array($_SESSION['user']['role'], ['admin','staff'])) { header("Location: index.php"); exit; }
-require 'header.php';
+// Show all errors for debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
+// Required files
+require 'db.php';
+require 'auth.php';
+require_login();
+
+// Allow only admin or staff to access this page
+if (!in_array($_SESSION['user']['role'], ['admin', 'staff'])) {
+  header("Location: index.php");
+  exit;
+}
+
+// Handle search input
 $q = trim($_GET['q'] ?? '');
-$params = []; $where = '';
+$params = [];
+$where = '';
+
 if ($q !== '') {
-  $where = "WHERE (u.name LIKE :q OR u.email LIKE :q)";
+  $where = "WHERE (name LIKE :q OR email LIKE :q)";
   $params[':q'] = "%$q%";
 }
-$rows = $pdo->prepare("SELECT u.id,u.name,u.email,u.role,u.address,u.date_of_birth,
-                              (SELECT MAX(login_at) FROM user_sessions s WHERE s.user_id=u.id) AS last_login,
-                              (SELECT MAX(logout_at) FROM user_sessions s WHERE s.user_id=u.id) AS last_logout,
-                              (SELECT MAX(created_at) FROM password_resets r WHERE r.user_id=u.id) AS last_pw_reset
-                       FROM users u $where ORDER BY u.name ASC LIMIT 200");
-$rows->execute($params);
-$users = $rows->fetchAll(PDO::FETCH_ASSOC);
 
-// privacy: staff can’t see address/DOB
+// Get users (basic info only)
+$stmt = $pdo->prepare("SELECT id, name, email, role, address, date_of_birth FROM users $where ORDER BY name ASC LIMIT 200");
+$stmt->execute($params);
+$users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Admins can see personal info (PII)
 $canSeePII = ($_SESSION['user']['role'] === 'admin');
 ?>
+
+<?php require 'header.php'; ?>
+
 <section class="container">
   <div class="card" style="padding:20px">
     <div class="flex" style="justify-content:space-between;align-items:center">
@@ -28,36 +43,40 @@ $canSeePII = ($_SESSION['user']['role'] === 'admin');
         <input class="input" name="q" placeholder="Search name or email…" value="<?= htmlspecialchars($q) ?>">
       </form>
     </div>
+
     <div class="table-wrap" style="overflow:auto;margin-top:12px">
       <table class="table">
         <thead>
           <tr>
             <th>ID</th><th>Name</th><th>Email</th><th>Role</th>
             <?php if ($canSeePII): ?><th>Address</th><th>DOB</th><?php endif; ?>
-            <th>Last login</th><th>Last logout</th><th>Actions</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
           <?php foreach ($users as $u): ?>
-          <tr>
-            <td>#<?= (int)$u['id'] ?></td>
-            <td><?= htmlspecialchars($u['name']) ?></td>
-            <td><?= htmlspecialchars($u['email']) ?></td>
-            <td><?= htmlspecialchars($u['role']) ?></td>
-            <?php if ($canSeePII): ?>
-              <td><?= htmlspecialchars($u['address'] ?? '') ?></td>
-              <td><?= htmlspecialchars($u['date_of_birth'] ?? '') ?></td>
-            <?php endif; ?>
-            <td><?= htmlspecialchars($u['last_login'] ?? '—') ?></td>
-            <td><?= htmlspecialchars($u['last_logout'] ?? '—') ?></td>
-            <td><a class="btn" href="admin_user_view.php?id=<?= (int)$u['id'] ?>">View</a></td>
-          </tr>
+            <tr>
+              <td>#<?= (int)$u['id'] ?></td>
+              <td><?= htmlspecialchars($u['name']) ?></td>
+              <td><?= htmlspecialchars($u['email']) ?></td>
+              <td><?= htmlspecialchars($u['role']) ?></td>
+              <?php if ($canSeePII): ?>
+                <td><?= htmlspecialchars($u['address'] ?? '') ?></td>
+                <td><?= htmlspecialchars($u['date_of_birth'] ?? '') ?></td>
+              <?php endif; ?>
+              <td>
+                <a class="btn" href="admin_user_view.php?id=<?= (int)$u['id'] ?>">View</a>
+                <a class="btn" href="admin_user_edit.php?id=<?= (int)$u['id'] ?>">Edit</a>
+                <a class="btn red" href="admin_user_delete.php?id=<?= (int)$u['id'] ?>" onclick="return confirm('Are you sure you want to delete this user?')">Delete</a>
+              </td>
+            </tr>
           <?php endforeach; if (!$users): ?>
-          <tr><td colspan="10" class="muted">No users found.</td></tr>
+            <tr><td colspan="7" class="muted">No users found.</td></tr>
           <?php endif; ?>
         </tbody>
       </table>
     </div>
   </div>
 </section>
+
 <?php require 'footer.php'; ?>

@@ -1,0 +1,19 @@
+<?php
+require 'db.php';
+require 'auth.php';
+require_login();
+
+if (!in_array($_SESSION['user']['role'], ['admin','staff'])) {
+  header("Location: index.php");
+  exit;
+}
+
+$bookingId = (int)($_POST['booking_id'] ?? 0);
+
+if ($bookingId > 0) {
+  $cancel = $pdo->prepare("UPDATE bookings SET status='cancelled' WHERE id=? LIMIT 1");
+  $cancel->execute([$bookingId]);
+}
+
+header("Location: admin_dashboard.php");
+exit;

@@ -4,6 +4,13 @@ require_once __DIR__.'/db.php';
 require_once __DIR__.'/auth.php';
 require_role(['admin','staff']);
 require_once __DIR__.'/header.php';
+require 'auth.php';
+require_login();
+
+if ($_SESSION['user']['role'] !== 'admin' && $_SESSION['user']['role'] !== 'staff') {
+    http_response_code(403);
+    exit("Forbidden");
+}
 
 function h($s){ return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
 function badge($status){
