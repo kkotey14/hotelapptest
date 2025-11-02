@@ -1,4 +1,7 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 require 'db.php'; require 'auth.php'; require_role(['admin','staff']); require 'header.php';
 
 $room_id = (int)($_GET['room_id'] ?? 0);

@@ -1,14 +1,12 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 require 'db.php';
 require 'auth.php';
+
 require_login();
-require_role_admin(['admin', 'staff']);
-
-if ($_SESSION['user']['role'] !== 'admin' && $_SESSION['user']['role'] !== 'staff') {
-  http_response_code(403);
-  exit("Forbidden");
-}
-
+require_role(['admin', 'staff']); // ✅ allows either role
 
 // Fetch summary counts
 $roomsCount = $pdo->query("SELECT COUNT(*) FROM rooms")->fetchColumn();
@@ -43,7 +41,6 @@ $recent = $pdo->query("
     <h3>Quick Actions</h3>
     <div class="flex" style="gap:10px">
       <a class="btn" href="admin_rooms.php">Manage Rooms</a>
-      <!-- Removed Manage Bookings -->
       <a class="btn" href="admin_users.php">Manage Users</a>
     </div>
   </div>

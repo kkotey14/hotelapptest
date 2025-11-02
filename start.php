@@ -1,12 +1,13 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 // Database connection settings
 $host = 'localhost';
 $user = 'root';           // Replace with your DB user
 $pass = '';               // Replace with your DB password
 $dbName = 'hotelapp';
 $dumpFile = __DIR__ . '/schema_with_rooms.sql';
-
-
 
 try {
     // Step 1: Connect to MySQL server (no DB selected yet)
@@ -28,16 +29,35 @@ try {
 
     $sql = file_get_contents($dumpFile);
 
-    // Split the SQL script into individual statements
+    // Split SQL script into individual statements
     $statements = array_filter(array_map('trim', explode(';', $sql)));
-
     foreach ($statements as $stmt) {
         if (!empty($stmt)) {
             $pdo->exec($stmt);
         }
     }
 
-    echo "<p>✅ Database tables and data imported successfully.</p>";
+    echo "<p>✅ Database tables and schema imported successfully.</p>";
+
+    // Step 5: Ensure a default admin user exists
+    $checkAdmin = $pdo->prepare("SELECT COUNT(*) FROM users WHERE role = 'admin'");
+    $checkAdmin->execute();
+    $adminCount = $checkAdmin->fetchColumn();
+
+    if ($adminCount == 0) {
+        $name = 'Admin User';
+        $email = 'admin@example.com';
+        $password = password_hash('password123', PASSWORD_DEFAULT);
+        $role = 'admin';
+
+        $stmt = $pdo->prepare("INSERT INTO users (name, email, password_hash, role) VALUES (?, ?, ?, ?)");
+        $stmt->execute([$name, $email, $password, $role]);
+
+        echo "<p>✅ Default admin account created: <strong>$email</strong> / password123</p>";
+    } else {
+        echo "<p>✅ Admin account already exists. No new admin created.</p>";
+    }
+
     echo "<p>🎉 Setup complete. You can now <a href='index.php'>start using the app</a>.</p>";
 
 } catch (PDOException $e) {

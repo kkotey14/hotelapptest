@@ -1,77 +1,64 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 require 'db.php';
 require 'auth.php';
 
-if (session_status() === PHP_SESSION_NONE) session_start();
+// Redirect if already logged in
+if (is_logged_in()) {
+    header("Location: " . next_after_login());
+    exit;
+}
 
 $err = '';
 
-// If user is already logged in, go to Stay page
-if (!empty($_SESSION['user'])) {
-  $to = $_GET['next'] ?? ($_SESSION['redirect_after_login'] ?? 'rooms_list.php');
-  unset($_SESSION['redirect_after_login']);
-  header("Location: {$to}");
-  exit;
-}
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  $email = trim($_POST['email'] ?? '');
-  $pw    = $_POST['password'] ?? '';
+    $email = trim($_POST['email'] ?? '');
+    $pw    = $_POST['password'] ?? '';
 
-  // Basic validation
-  if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    $err = 'Please enter a valid email address.';
-  } elseif ($pw === '') {
-    $err = 'Password is required.';
-  } else {
-    // Fetch user
-    $stmt = $pdo->prepare("
-      SELECT id, name, email, role, password_hash
-      FROM users
-      WHERE email = ?
-      LIMIT 1
-    ");
-    $stmt->execute([$email]);
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    if ($user && password_verify($pw, $user['password_hash'])) {
-      // 1) Set session
-      $_SESSION['user'] = [
-        'id'    => $user['id'],
-        'name'  => $user['name'],
-        'email' => $user['email'],
-        'role'  => $user['role'],
-      ];
-
-      // 2) Log this session (login_at is defaulted in DB)
-      try {
-        $insSess = $pdo->prepare("
-          INSERT INTO user_sessions (user_id, ip, user_agent)
-          VALUES (?, ?, ?)
-        ");
-        $insSess->execute([
-          $user['id'],
-          $_SERVER['REMOTE_ADDR'] ?? null,
-          substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255)
-        ]);
-      } catch (Throwable $e) {
-        // Don’t block login if logging fails; just record it
-        error_log('user_sessions insert failed: '.$e->getMessage());
-      }
-
-      // 3) Smart redirect
-      $redirect = $_GET['next'] ?? ($_SESSION['redirect_after_login'] ?? 'rooms_list.php');
-      unset($_SESSION['redirect_after_login']);
-
-      header("Location: {$redirect}");
-      exit;
+    // Basic validation
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $err = 'Please enter a valid email address.';
+    } elseif ($pw === '') {
+        $err = 'Password is required.';
     } else {
-      $err = 'Invalid email or password.';
+        // Fetch user by email
+        $stmt = $pdo->prepare("SELECT id, name, email, role, password_hash FROM users WHERE email = ? LIMIT 1");
+        $stmt->execute([$email]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($user && password_verify($pw, $user['password_hash'])) {
+            // Store basic user info in session
+            $_SESSION['user'] = [
+                'id'    => $user['id'],
+                'name'  => $user['name'],
+                'email' => $user['email'],
+                'role'  => $user['role'],
+            ];
+
+            // Optional: Save session info to DB
+            try {
+                $log = $pdo->prepare("INSERT INTO user_sessions (user_id, ip, user_agent) VALUES (?, ?, ?)");
+                $log->execute([
+                    $user['id'],
+                    $_SERVER['REMOTE_ADDR'] ?? null,
+                    substr($_SERVER['HTTP_USER_AGENT'] ?? '', 255),
+                ]);
+            } catch (Throwable $e) {
+                error_log("Session logging failed: " . $e->getMessage());
+            }
+
+            // Redirect to saved or fallback
+            header("Location: " . next_after_login());
+            exit;
+        } else {
+            // Don't reveal what failed (email or password)
+            $err = 'Invalid email or password.';
+        }
     }
-  }
 }
 
-// Render page AFTER handling POST so redirects above are clean
 require 'header.php';
 ?>
 <section class="container" style="padding-top:28px">
