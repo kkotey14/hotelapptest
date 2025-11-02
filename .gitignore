@@ -2,6 +2,10 @@
 config.php
 .env
 
+# Sensitive SQL dump
+full_dump.sql
+
+
 # Ignore system files
 .DS_Store
 

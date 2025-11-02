@@ -4,7 +4,8 @@ $host = 'localhost';
 $user = 'root';           // Replace with your DB user
 $pass = '';               // Replace with your DB password
 $dbName = 'hotelapp';
-$dumpFile = __DIR__ . '/full_dump.sql';
+$dumpFile = __DIR__ . '/schema_only.sql';
+
 
 try {
     // Step 1: Connect to MySQL server (no DB selected yet)
