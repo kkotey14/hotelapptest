@@ -7,10 +7,6 @@ define('DB_NAME', 'hotelapp');
 define('DB_USER', 'root');
 define('DB_PASS', '');
 
-// Stripe keys should come from env or be filled locally (never committed)
-define('STRIPE_PUBLISHABLE', getenv('STRIPE_PUBLISHABLE') ?: 'pk_test_your_publishable_here');
-define('STRIPE_SECRET',      getenv('STRIPE_SECRET') ?: 'sk_test_your_secret_here');
-
 define('BASE_URL', '/hotelapp');
 
 // Branding (optional)
