@@ -13,16 +13,18 @@ function send_mail(string $to, string $subject, string $html): bool
     try {
         // Mailtrap SMTP
         $mail->isSMTP();
-        $mail->Host       = 'sandbox.smtp.mailtrap.io';
+        $mail->Host       = defined('MAIL_HOST') ? MAIL_HOST : 'sandbox.smtp.mailtrap.io';
         $mail->SMTPAuth   = true;
-        $mail->Username   = 'be4c62483da3dd';   // your Mailtrap username
-        $mail->Password   = 'f77fe1e12b6937';   // your Mailtrap password
-        $mail->Port       = 2525;               // safest choice
+        $mail->Username   = defined('MAIL_USER') ? MAIL_USER : '';
+        $mail->Password   = defined('MAIL_PASS') ? MAIL_PASS : '';
+        $mail->Port       = defined('MAIL_PORT') ? MAIL_PORT : 2525;
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->CharSet    = 'UTF-8';
 
         // Sender
-        $mail->setFrom('no-reply@yourhotel.test', 'The Riverside Reservations');
+        $from_addr = defined('MAIL_FROM_ADDR') ? MAIL_FROM_ADDR : 'no-reply@yourhotel.test';
+        $from_name = defined('MAIL_FROM_NAME') ? MAIL_FROM_NAME : 'The Riverside Reservations';
+        $mail->setFrom($from_addr, $from_name);
 
         // Recipient (Mailtrap will catch everything in the inbox)
         $mail->addAddress($to);

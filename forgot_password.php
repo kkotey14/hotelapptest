@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <p class="muted" style="color:#6b7280">If you didn’t request this, you can ignore this email.</p>
         </div>';
       // Fire and forget
-      @send_mail($u['email'], $subject, $html);
+      send_mail($u['email'], $subject, $html);
     }
   } else {
     $notice = 'Please enter your email address.';
