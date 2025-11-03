@@ -32,12 +32,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $name  = trim($_POST['name'] ?? '');
   $email = trim($_POST['email'] ?? '');
   $role  = trim($_POST['role'] ?? '');
+  $address = trim($_POST['address'] ?? '');
+  $dob = trim($_POST['date_of_birth'] ?? '');
 
   if ($name === '' || $email === '' || !in_array($role, $roles)) {
     $err = "All fields are required and role must be valid.";
   } else {
-    $update = $pdo->prepare("UPDATE users SET name=?, email=?, role=? WHERE id=?");
-    $update->execute([$name, $email, $role, $id]);
+    $update = $pdo->prepare("UPDATE users SET name=?, email=?, role=?, address=?, date_of_birth=? WHERE id=?");
+    $update->execute([$name, $email, $role, $address, $dob, $id]);
     header("Location: admin_users.php");
     exit;
   }
@@ -67,6 +69,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <option value="<?= $r ?>" <?= $user['role'] === $r ? 'selected' : '' ?>><?= ucfirst($r) ?></option>
         <?php endforeach; ?>
       </select>
+
+      <label>Address:</label>
+      <input class="input" name="address" value="<?= htmlspecialchars($user['address']) ?>">
+
+      <label>Date of Birth:</label>
+      <input class="input" type="date" name="date_of_birth" value="<?= htmlspecialchars($user['date_of_birth']) ?>">
 
       <button class="btn primary" style="margin-top:14px">Save Changes</button>
       <a class="btn" href="admin_users.php">Cancel</a>

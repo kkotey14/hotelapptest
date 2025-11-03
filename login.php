@@ -37,17 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'role'  => $user['role'],
             ];
 
-            // Optional: Save session info to DB
-            try {
-                $log = $pdo->prepare("INSERT INTO user_sessions (user_id, ip, user_agent) VALUES (?, ?, ?)");
-                $log->execute([
-                    $user['id'],
-                    $_SERVER['REMOTE_ADDR'] ?? null,
-                    substr($_SERVER['HTTP_USER_AGENT'] ?? '', 255),
-                ]);
-            } catch (Throwable $e) {
-                error_log("Session logging failed: " . $e->getMessage());
-            }
+
 
             // Redirect to saved or fallback
             header("Location: " . next_after_login());

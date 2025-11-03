@@ -7,11 +7,13 @@ if ($_SERVER['REQUEST_METHOD']==='POST' && !empty($_SESSION['user']) && in_array
   $type   = trim($_POST['type'] ?? '');
   $rate   = (float)($_POST['rate'] ?? 0);
   $max    = (int)($_POST['max_guests'] ?? 2);
+  $inventory = (int)($_POST['inventory'] ?? 1);
+  $floor = (int)($_POST['floor'] ?? 1);
   $img    = trim($_POST['image_url'] ?? '');
   $desc   = trim($_POST['description'] ?? '');
   if ($number && $type && $rate > 0) {
-    $stmt = $pdo->prepare("INSERT INTO rooms (number,type,image_url,description,rate_cents,max_guests) VALUES (?,?,?,?,?,?)");
-    $stmt->execute([$number,$type,$img,$desc,(int)round($rate*100),$max]);
+    $stmt = $pdo->prepare("INSERT INTO rooms (number,type,image_url,description,rate_cents,max_guests,inventory,floor) VALUES (?,?,?,?,?,?,?,?)");
+    $stmt->execute([$number,$type,$img,$desc,(int)round($rate*100),$max,$inventory,$floor]);
   }
   header("Location: rooms_list.php"); exit;
 }
@@ -129,6 +131,8 @@ if (!$forceEmpty) {
       <div class="span-4"><label>Type<input class="input" name="type" placeholder="Queen, King, Suite" required></label></div>
       <div class="span-4"><label>Rate (USD/night)<input class="input" name="rate" type="number" step="0.01" required></label></div>
       <div class="span-4"><label>Max guests<input class="input" name="max_guests" type="number" value="2" required></label></div>
+      <div class="span-4"><label>Inventory<input class="input" name="inventory" type="number" value="1" required></label></div>
+      <div class="span-4"><label>Floor<input class="input" name="floor" type="number" value="1" required></label></div>
       <div class="span-8"><label>Image URL<input class="input" name="image_url" placeholder="https://..."></label></div>
       <div class="span-12"><label>Description<textarea class="input" name="description" rows="3"></textarea></label></div>
       <div class="span-12"><button class="btn primary">Create</button></div>
