@@ -15,6 +15,11 @@ $errors = [];
 $success = false;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  if (!is_logged_in()) {
+    header('Location: login.php');
+    exit;
+  }
+
   $room_id  = $_POST['room_id'] ?? '';
   $ci       = $_POST['ci'] ?? $_POST['check_in'] ?? '';
   $co       = $_POST['co'] ?? $_POST['check_out'] ?? '';
