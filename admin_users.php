@@ -26,7 +26,7 @@ if ($q !== '') {
 }
 
 // Get users (basic info only)
-$stmt = $pdo->prepare("SELECT id, name, email, role, address, date_of_birth FROM users $where ORDER BY name ASC LIMIT 200");
+$stmt = $pdo->prepare("SELECT id, name, email, role FROM users $where ORDER BY name ASC LIMIT 200");
 $stmt->execute($params);
 $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -50,7 +50,6 @@ $canSeePII = ($_SESSION['user']['role'] === 'admin');
         <thead>
           <tr>
             <th>ID</th><th>Name</th><th>Email</th><th>Role</th>
-            <?php if ($canSeePII): ?><th>Address</th><th>DOB</th><?php endif; ?>
             <th>Actions</th>
           </tr>
         </thead>
@@ -61,10 +60,6 @@ $canSeePII = ($_SESSION['user']['role'] === 'admin');
               <td><?= htmlspecialchars($u['name']) ?></td>
               <td><?= htmlspecialchars($u['email']) ?></td>
               <td><?= htmlspecialchars($u['role']) ?></td>
-              <?php if ($canSeePII): ?>
-                <td><?= htmlspecialchars($u['address'] ?? '') ?></td>
-                <td><?= htmlspecialchars($u['date_of_birth'] ?? '') ?></td>
-              <?php endif; ?>
               <td>
                 <a class="btn" href="admin_user_view.php?id=<?= (int)$u['id'] ?>">View</a>
                 <a class="btn" href="admin_user_edit.php?id=<?= (int)$u['id'] ?>">Edit</a>
@@ -72,7 +67,7 @@ $canSeePII = ($_SESSION['user']['role'] === 'admin');
               </td>
             </tr>
           <?php endforeach; if (!$users): ?>
-            <tr><td colspan="7" class="muted">No users found.</td></tr>
+            <tr><td colspan="5" class="muted">No users found.</td></tr>
           <?php endif; ?>
         </tbody>
       </table>
