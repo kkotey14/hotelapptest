@@ -40,7 +40,7 @@ $recent = $pdo->query("
   <div class="card" style="margin-bottom:20px">
     <h3>Quick Actions</h3>
     <div class="flex" style="gap:10px">
-      <a class="btn" href="admin_rooms.php">Manage Rooms</a>
+      <a class="btn" href="manage_rooms.php">Manage Rooms</a>
       <a class="btn" href="admin_users.php">Manage Users</a>
     </div>
   </div>
