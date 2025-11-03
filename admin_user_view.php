@@ -28,46 +28,19 @@ $isAdmin = ($_SESSION['user']['role'] === 'admin');
 require 'header.php';
 ?>
 <section class="container card" style="padding:20px">
-  <h2>User #<?= (int)$user['id'] ?> — <?= htmlspecialchars($user['first_name'].' '.$user['last_name']) ?></h2>
+  <h2>User #<?= (int)$user['id'] ?> — <?= htmlspecialchars($user['name']) ?></h2>
   <p>Email: <?= htmlspecialchars($user['email']) ?></p>
   <p>Role: <?= htmlspecialchars($user['role']) ?></p>
 
   <?php if ($isAdmin): ?>
     <p>Address: <?= htmlspecialchars($user['address']) ?></p>
-    <p>Date of Birth: <?= htmlspecialchars($user['dob']) ?></p>
+    <p>Date of Birth: <?= htmlspecialchars($user['date_of_birth']) ?></p>
     <p>Account Created: <?= htmlspecialchars($user['created_at']) ?></p>
-    <p>Last Updated: <?= htmlspecialchars($user['updated_at']) ?></p>
   <?php else: ?>
     <p>(Some personal details hidden for staff)</p>
   <?php endif; ?>
 
-  <hr>
 
-  <h3>Login Sessions</h3>
-  <?php
-    $sess = $pdo->prepare("SELECT * FROM user_sessions WHERE user_id=? ORDER BY login_time DESC");
-    $sess->execute([$view_id]);
-    $sessions = $sess->fetchAll(PDO::FETCH_ASSOC);
-  ?>
-  <?php if ($sessions): ?>
-    <table class="table">
-      <thead>
-        <tr><th>Login Time</th><th>Logout Time</th><th>IP</th><th>UA</th></tr>
-      </thead>
-      <tbody>
-        <?php foreach ($sessions as $s): ?>
-          <tr>
-            <td><?= htmlspecialchars($s['login_time']) ?></td>
-            <td><?= htmlspecialchars($s['logout_time'] ?: '- still active -') ?></td>
-            <td><?= htmlspecialchars($s['ip_address']) ?></td>
-            <td><?= htmlspecialchars($s['user_agent']) ?></td>
-          </tr>
-        <?php endforeach; ?>
-      </tbody>
-    </table>
-  <?php else: ?>
-    <p class="muted">No sessions recorded.</p>
-  <?php endif; ?>
 
   <hr>
 

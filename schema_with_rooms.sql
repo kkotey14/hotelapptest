@@ -137,6 +137,8 @@ CREATE TABLE `users` (
   `email` varchar(120) NOT NULL,
   `role` enum('customer','staff','admin') DEFAULT 'customer',
   `password_hash` varchar(255) NOT NULL,
+  `address` TEXT DEFAULT NULL,
+  `date_of_birth` DATE DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)

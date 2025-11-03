@@ -10,14 +10,16 @@ $msg = $err = null;
 if ($_SERVER['REQUEST_METHOD']==='POST') {
   if (isset($_POST['profile_update'])) {
     $name  = trim($_POST['name'] ?? '');
-    $phone = trim($_POST['phone'] ?? '');
+    $address = trim($_POST['address'] ?? '');
+    $dob = trim($_POST['date_of_birth'] ?? '');
 
-    $up = $pdo->prepare("UPDATE users SET name=?, phone=? WHERE id=?");
-    $up->execute([$name ?: null, $phone ?: null, $uid]);
+    $up = $pdo->prepare("UPDATE users SET name=?, address=?, date_of_birth=? WHERE id=?");
+    $up->execute([$name ?: null, $address ?: null, $dob ?: null, $uid]);
 
     // refresh session copy
     $_SESSION['user']['name']  = $name;
-    $_SESSION['user']['phone'] = $phone;
+    $_SESSION['user']['address'] = $address;
+    $_SESSION['user']['date_of_birth'] = $dob;
 
     $msg = "Profile updated.";
   }
@@ -32,10 +34,10 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
     } elseif ($npw !== $cpw) {
       $err = "New password and confirmation do not match.";
     } else {
-      $st = $pdo->prepare("SELECT password FROM users WHERE id=?");
+      $st = $pdo->prepare("SELECT password_hash FROM users WHERE id=?");
       $st->execute([$uid]);
       $row = $st->fetch(PDO::FETCH_ASSOC);
-      if (!$row || !password_verify($current, $row['password'])) {
+      if (!$row || !password_verify($current, $row['password_hash'])) {
         $err = "Current password is incorrect.";
       } else {
         $hash = password_hash($npw, PASSWORD_DEFAULT);
@@ -48,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
 }
 
 // Load fresh user
-$st = $pdo->prepare("SELECT id, email, name, phone, role, created_at FROM users WHERE id=?");
+$st = $pdo->prepare("SELECT id, email, name, address, date_of_birth, role, created_at FROM users WHERE id=?");
 $st->execute([$uid]);
 $me = $st->fetch(PDO::FETCH_ASSOC);
 
@@ -95,17 +97,22 @@ $initial = strtoupper($me['name'] ? mb_substr($me['name'],0,1) : mb_substr($me['
         <h2 class="h3" style="margin:0 0 10px">Profile details</h2>
         <form method="post" class="grid">
           <input type="hidden" name="profile_update" value="1">
-          <div class="span-6">
+          <div class="span-12">
             <label>Name
               <input class="input" name="name" value="<?= htmlspecialchars($me['name'] ?? '') ?>" placeholder="Your name">
             </label>
           </div>
-          <div class="span-6">
-            <label>Phone
-              <input class="input" name="phone" value="<?= htmlspecialchars($me['phone'] ?? '') ?>" placeholder="(203) 555-0123">
+          <div class="span-12">
+            <label>Address
+              <input class="input" name="address" value="<?= htmlspecialchars($me['address'] ?? '') ?>" placeholder="123 Main St, Anytown, USA">
             </label>
           </div>
-          <div class="span-12">
+          <div class="span-6">
+            <label>Date of Birth
+              <input class="input" type="date" name="date_of_birth" value="<?= htmlspecialchars($me['date_of_birth'] ?? '') ?>">
+            </label>
+          </div>
+          <div class="span-6">
             <label>Email
               <input class="input" value="<?= htmlspecialchars($me['email']) ?>" disabled>
             </label>
