@@ -1,6 +1,12 @@
 <?php
 // auth.php
 
+require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/session_handler.php';
+
+$handler = new DbSessionHandler($pdo);
+session_set_save_handler($handler, true);
+
 if (session_status() === PHP_SESSION_NONE) session_start();
 
 /** Helpers */

@@ -54,6 +54,7 @@ $rooms = $pdo->query("SELECT id, type, number, inventory, rate_cents, max_guests
           <th>Max Guests</th>
           <th>Inventory</th>
           <th>Status</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -65,6 +66,7 @@ $rooms = $pdo->query("SELECT id, type, number, inventory, rate_cents, max_guests
           <td><?= (int)$r['max_guests'] ?></td>
           <td><?= (int)$r['inventory'] ?></td>
           <td><?= $r['is_active'] ? '✅ Active' : '❌ Inactive' ?></td>
+          <td><a class="btn tiny" href="edit_inventory.php?id=<?= (int)$r['id'] ?>">Edit Inventory</a></td>
         </tr>
         <?php endforeach; ?>
       </tbody>

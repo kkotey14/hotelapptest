@@ -7,17 +7,18 @@ $host = 'localhost';
 $user = 'root';           // Replace with your DB user
 $pass = '';               // Replace with your DB password
 $dbName = 'hotelapp';
-$dumpFile = __DIR__ . '/schema_with_rooms.sql';
-
+    $dumpFile = __DIR__ . '/schema.sql';
 try {
     // Step 1: Connect to MySQL server (no DB selected yet)
     $pdo = new PDO("mysql:host=$host", $user, $pass, [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
     ]);
 
-    // Step 2: Create the database if it doesn't exist
-    $pdo->exec("CREATE DATABASE IF NOT EXISTS `$dbName` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci");
-    echo "<p>✅ Database '$dbName' created or already exists.</p>";
+    // Step 2: Drop the database if it exists, then create it.
+    $pdo->exec("DROP DATABASE IF EXISTS `$dbName`");
+    echo "<p>✅ Database '$dbName' dropped if it existed.</p>";
+    $pdo->exec("CREATE DATABASE `$dbName` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci");
+    echo "<p>✅ Database '$dbName' created.</p>";
 
     // Step 3: Connect to the new database
     $pdo->exec("USE `$dbName`");
@@ -38,6 +39,8 @@ try {
     }
 
     echo "<p>✅ Database tables and schema imported successfully.</p>";
+
+
 
     // Step 5: Ensure a default admin user exists
     $checkAdmin = $pdo->prepare("SELECT COUNT(*) FROM users WHERE role = 'admin'");

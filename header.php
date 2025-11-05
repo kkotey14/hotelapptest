@@ -1,4 +1,4 @@
-<?php if (session_status() === PHP_SESSION_NONE) session_start(); require_once 'config.php'; ?>
+<?php require_once 'auth.php'; require_once 'config.php'; ?>
 <!doctype html>
 <html lang="en">
 <head>

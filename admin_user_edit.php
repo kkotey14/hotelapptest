@@ -40,6 +40,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   } else {
     $update = $pdo->prepare("UPDATE users SET name=?, email=?, role=?, address=?, date_of_birth=? WHERE id=?");
     $update->execute([$name, $email, $role, $address, $dob, $id]);
+
+    if ($role !== $user['role']) {
+        $handler->destroyUserSessions($id);
+    }
     header("Location: admin_users.php");
     exit;
   }
