@@ -11,7 +11,7 @@ require_role(['admin', 'staff']); // ✅ allows either role
 // Fetch summary counts
 $roomsCount = $pdo->query("SELECT COUNT(*) FROM rooms")->fetchColumn();
 $bookingsCount = $pdo->query("SELECT COUNT(*) FROM bookings")->fetchColumn();
-$upcomingCount = $pdo->query("SELECT COUNT(*) FROM bookings WHERE check_in >= CURDATE()")->fetchColumn();
+$upcomingCount = $pdo->query("SELECT COUNT(*) FROM bookings WHERE check_in >= CURDATE() AND status != 'cancelled'")->fetchColumn();
 $customersCount = $pdo->query("SELECT COUNT(*) FROM users WHERE role = 'customer'")->fetchColumn();
 
 // Fetch recent bookings
