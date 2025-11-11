@@ -72,7 +72,7 @@ require 'header.php';
             <td><?= htmlspecialchars($b['check_out']) ?></td>
             <td><?= htmlspecialchars($b['status']) ?></td>
             <td><?= (int)$b['guests'] ?></td>
-            <td><a class="btn" href="room.php?id=<?= $b['room_id'] ?>" target="_blank">View Room</a></td>
+            <td><a class="btn" href="room.php?id=<?= $b['room_id'] ?>">View Room</a></td>
           </tr>
         <?php endforeach; ?>
       </tbody>
