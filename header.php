@@ -24,8 +24,13 @@
       <a href="index.php#explore" class="hide-mobile">Explore</a>
       <?php if (!empty($_SESSION['user'])): ?>
         <a href="my_bookings.php" class="hide-mobile">My Bookings</a>
-        <?php if ($_SESSION['user']['role'] !== 'customer'): ?>
-          <a href="admin_dashboard.php" class="hide-mobile">Admin</a>
+        <?php if (!empty($_SESSION['user'])):
+          $role = $_SESSION['user']['role'];
+          if ($role === 'admin'): ?>
+            <a href="admin_dashboard.php" class="hide-mobile">Admin</a>
+          <?php elseif ($role === 'staff'): ?>
+            <a href="staff_dashboard.php" class="hide-mobile">Staff</a>
+          <?php endif; ?>
         <?php endif; ?>
       <?php endif; ?>
     </nav>
@@ -56,8 +61,10 @@
             </div>
             
             <a class="menu-item" href="my_bookings.php">My Bookings</a>
-            <?php if (in_array($u['role'], ['admin','staff'])): ?>
+            <?php if ($u['role'] === 'admin'): ?>
               <a class="menu-item" href="admin_dashboard.php">Admin</a>
+            <?php elseif ($u['role'] === 'staff'): ?>
+              <a class="menu-item" href="staff_dashboard.php">Staff</a>
             <?php endif; ?>
             <a class="menu-item" href="logout.php">Logout</a>
           </div>

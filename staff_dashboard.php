@@ -6,14 +6,13 @@ require 'db.php';
 require 'auth.php';
 
 require_login();
-require_role(['admin']); // Only admins can access this page
+require_role(['admin', 'staff']); // ✅ allows either role
 
 // Fetch summary counts
 $roomsCount = $pdo->query("SELECT COUNT(*) FROM rooms")->fetchColumn();
 $bookingsCount = $pdo->query("SELECT COUNT(*) FROM bookings")->fetchColumn();
 $upcomingCount = $pdo->query("SELECT COUNT(*) FROM bookings WHERE check_in >= CURDATE() AND status != 'cancelled'")->fetchColumn();
 $customersCount = $pdo->query("SELECT COUNT(*) FROM users WHERE role = 'customer'")->fetchColumn();
-$staffCount = $pdo->query("SELECT COUNT(*) FROM users WHERE role = 'staff'")->fetchColumn();
 
 // Fetch recent bookings
 $recent = $pdo->query("
@@ -29,20 +28,18 @@ $recent = $pdo->query("
 <?php require 'header.php'; ?>
 
 <section class="container">
-  <h2>Admin Dashboard</h2>
+  <h2>Staff Dashboard</h2>
 
   <div class="grid" style="margin-top:10px;margin-bottom:20px">
     <div class="card center"><div class="h1"><?= (int)$roomsCount ?></div><div class="muted">Rooms</div></div>
     <div class="card center"><div class="h1"><?= (int)$bookingsCount ?></div><div class="muted">Bookings</div></div>
     <div class="card center"><div class="h1"><?= (int)$upcomingCount ?></div><div class="muted">Upcoming</div></div>
     <div class="card center"><div class="h1"><?= (int)$customersCount ?></div><div class="muted">Customers</div></div>
-    <div class="card center"><div class="h1"><?= (int)$staffCount ?></div><div class="muted">Staff</div></div>
   </div>
 
   <div class="card" style="margin-bottom:20px">
     <h3>Quick Actions</h3>
     <div class="flex" style="gap:10px">
-      <a class="btn" href="manage_rooms.php">Manage Rooms</a>
       <a class="btn" href="admin_users.php">Manage Users</a>
     </div>
   </div>

@@ -69,6 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     ");
     if ($insert->execute([$user_id, $room_id, $ci, $co])) {
       $success = true;
+      $booking_id = $pdo->lastInsertId();
     } else {
       $errors[] = 'Database error, please try again.';
     }
@@ -80,7 +81,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <h1 class="h2">Booking Confirmation</h1>
 
   <?php if ($success): ?>
-    <p class="success">✅ Your booking was successful! View it under <a href="my_bookings.php">My Bookings</a>.</p>
+    <div class="card" style="padding:20px; max-width: 700px; margin: 0 auto;">
+        <h3 style="margin-top:0;">✅ Your booking request has been received!</h3>
+        <p>Your request is now pending approval from our staff. You can view its status under <a href="my_bookings.php">My Bookings</a>.</p>
+        <hr>
+        <p><strong>Confirmation ID:</strong> #<?= htmlspecialchars($booking_id) ?></p>
+        <p><strong>Check-in Time:</strong> 2:00 PM</p>
+        <p><strong>Check-out Time:</strong> 12:00 PM</p>
+        <hr>
+        <p class="muted">Please be ready to show your confirmation ID to the receptionist when you arrive at the hotel.</p>
+    </div>
   <?php else: ?>
     <div class="error">
       <?php foreach ($errors as $e): ?>

@@ -37,9 +37,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'role'  => $user['role'],
             ];
 
+            // Regenerate session ID to prevent session fixation
+            session_regenerate_id(true);
 
-
-            // Redirect to saved or fallback
+            // Redirect using the centralized, role-aware function
             header("Location: " . next_after_login());
             exit;
         } else {

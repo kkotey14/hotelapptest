@@ -19,16 +19,28 @@ function is_logged_in() {
 }
 
 function next_after_login(): string {
-  $fallback = 'rooms_list.php';
-  if (empty($_SESSION['redirect_after_login'])) return $fallback;
-  $target = $_SESSION['redirect_after_login'];
-  unset($_SESSION['redirect_after_login']);
+  // 1. If a specific page was requested before login, redirect there.
+  if (!empty($_SESSION['redirect_after_login'])) {
+    $target = $_SESSION['redirect_after_login'];
+    unset($_SESSION['redirect_after_login']);
 
-  // Prevent open redirects
-  if (preg_match('~^(https?:)?//~i', $target)) return $fallback;
-  if (strpos($target, "\n") !== false || strpos($target, "\r") !== false) return $fallback;
+    // Prevent open redirects
+    if (preg_match('~^(https?:)?//~i', $target) || strpos($target, "\n") !== false || strpos($target, "\r") !== false) {
+        // Fallback to role-based default if target is invalid
+    } else {
+        return ltrim($target, '/');
+    }
+  }
 
-  return ltrim($target, '/');
+  // 2. Otherwise, fall back to a role-based default dashboard.
+  $role = $_SESSION['user']['role'] ?? 'customer';
+  if ($role === 'admin') {
+    return 'admin_dashboard.php';
+  } elseif ($role === 'staff') {
+    return 'staff_dashboard.php';
+  } else {
+    return 'my_bookings.php'; // A better default for customers
+  }
 }
 
 function require_login() {
@@ -63,4 +75,35 @@ function require_role_admin($roles = []) {
     require 'footer.php';
     exit;
   }
+}
+
+// --- CSRF Protection ---
+
+/**
+ * Get the current CSRF token, generating one if it doesn't exist.
+ * @return string
+ */
+function csrf_token(): string {
+    if (empty($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
+}
+
+/**
+ * Echo a hidden input field with the CSRF token for use in forms.
+ */
+function csrf_input(): void {
+    echo '<input type="hidden" name="csrf_token" value="' . csrf_token() . '">';
+}
+
+/**
+ * Verify the CSRF token from a POST request.
+ * If it fails, the script will die.
+ */
+function verify_csrf_token(): void {
+    if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'] ?? '', $_POST['csrf_token'])) {
+        http_response_code(403);
+        die('CSRF token validation failed.');
+    }
 }

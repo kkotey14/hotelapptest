@@ -12,6 +12,7 @@ $flash = $error = '';
 
 // ---------- POST: Cancel ----------
 if ($_SERVER['REQUEST_METHOD']==='POST' && isset($_POST['cancel_booking_id'])) {
+  verify_csrf_token();
   $bid = (int)($_POST['cancel_booking_id'] ?? 0);
 
   // User can cancel only own booking unless admin/staff
@@ -35,6 +36,7 @@ if ($_SERVER['REQUEST_METHOD']==='POST' && isset($_POST['cancel_booking_id'])) {
 
 // ---------- POST: Extend (update check-out) ----------
 if ($_SERVER['REQUEST_METHOD']==='POST' && isset($_POST['extend_booking_id'])) {
+  verify_csrf_token();
   $bid   = (int)($_POST['extend_booking_id'] ?? 0);
   $newCo = trim($_POST['new_check_out'] ?? '');
 
@@ -183,6 +185,7 @@ require_once __DIR__.'/header.php';
             <?php if ($can_extend): ?>
               <form method="post" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
                 <input type="hidden" name="extend_booking_id" value="<?= (int)$b['id'] ?>">
+                <?php csrf_input(); ?>
                 <div>
                   <label class="tiny muted" style="display:block;margin-bottom:4px">New check-out</label>
                   <input class="input extend-date"
@@ -200,6 +203,7 @@ require_once __DIR__.'/header.php';
             <?php if ($can_cancel): ?>
               <form method="post" style="margin-top:8px">
                 <input type="hidden" name="cancel_booking_id" value="<?= (int)$b['id'] ?>">
+                <?php csrf_input(); ?>
                 <button class="btn" type="submit" onclick="return confirm('Cancel this booking?');">Cancel</button>
               </form>
             <?php endif; ?>

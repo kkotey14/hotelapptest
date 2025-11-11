@@ -67,8 +67,14 @@ $canSeePII = ($_SESSION['user']['role'] === 'admin');
               <?php endif; ?>
               <td>
                 <a class="btn" href="admin_user_view.php?id=<?= (int)$u['id'] ?>">View</a>
-                <a class="btn" href="admin_user_edit.php?id=<?= (int)$u['id'] ?>">Edit</a>
-                <a class="btn red" href="admin_user_delete.php?id=<?= (int)$u['id'] ?>" onclick="return confirm('Are you sure you want to delete this user?')">Delete</a>
+                <?php if ($_SESSION['user']['role'] === 'admin'): ?>
+                  <a class="btn" href="admin_user_edit.php?id=<?= (int)$u['id'] ?>">Edit</a>
+                  <form method="post" action="admin_user_delete.php" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this user?');">
+                    <input type="hidden" name="id" value="<?= (int)$u['id'] ?>">
+                    <?php csrf_input(); ?>
+                    <button type="submit" class="btn red">Delete</button>
+                  </form>
+                <?php endif; ?>
               </td>
             </tr>
           <?php endforeach; if (!$users): ?>

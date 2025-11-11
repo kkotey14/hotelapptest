@@ -102,7 +102,7 @@ $showDebug = (!empty($_GET['debug']) && $_GET['debug']=='1') ||
       <div>
         <h1 class="h2" style="color:#fff;margin:0"><?= htmlspecialchars($room['type']) ?></h1>
         <div class="muted" style="color:#e7edf6">Max <?= (int)$room['max_guests'] ?> · <?= $avgText ?></div>
-        <?php if (!empty($_SESSION['user']) && in_array($_SESSION['user']['role'], ['admin','staff'])): ?>
+        <?php if (!empty($_SESSION['user']) && $_SESSION['user']['role'] === 'admin'): ?>
           <div style="margin-top:10px">
             <a class="btn" href="edit_guest_limit.php?id=<?= (int)$room['id'] ?>">Edit Guest Limit</a>
           </div>
@@ -155,7 +155,7 @@ $showDebug = (!empty($_GET['debug']) && $_GET['debug']=='1') ||
             <img src="<?= htmlspecialchars($g['url']) ?>" alt="Photo">
           </button>
         <?php endforeach; ?>
-        <?php if (!empty($_SESSION['user']) && in_array($_SESSION['user']['role'], ['admin','staff'])): ?>
+        <?php if (!empty($_SESSION['user']) && $_SESSION['user']['role'] === 'admin'): ?>
           <a class="btn" href="admin_room_photos.php?room_id=<?= (int)$room['id'] ?>" style="margin-left:8px">Manage photos</a>
         <?php endif; ?>
       </div>
