@@ -1,8 +1,8 @@
 <?php
 require 'db.php';
 require 'header.php';
-require_once __DIR__.'/lib_mail.php';
 require_once __DIR__.'/config.php';
+require_once __DIR__.'/lib_mail.php';
 
 $notice = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       // Absolute link
       $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
       $base   = $scheme.'://'.$_SERVER['HTTP_HOST'].(defined('BASE_URL') ? BASE_URL : '');
-      $link   = $base.'/reset_password.php?token='.urlencode($token);
+      $link   = $base.'/password_update.php?token='.urlencode($token);
 
       // Send mail (Mailtrap in dev)
       $subject = 'Password Reset — '.(defined('HOTEL_NAME') ? HOTEL_NAME : 'HotelApp');
