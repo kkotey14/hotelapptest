@@ -10,13 +10,12 @@ $is_token_valid = false;
 // Step 1: Validate the token from the URL
 if ($token) {
     try {
-        $stmt = $pdo->prepare(
-            "SELECT pr.id, pr.user_id, pr.expires_at, u.email, u.name 
-             FROM password_resets pr 
-             JOIN users u ON u.id = pr.user_id
-             WHERE pr.token = ? AND pr.used = 0 LIMIT 1"
-        );
-        $stmt->execute([$token]);
+                $stmt = $pdo->prepare(
+                    "SELECT pr.id, pr.user_id, pr.expires_at, u.email, u.name
+                     FROM password_resets pr
+                     JOIN users u ON u.id = pr.user_id
+                     WHERE pr.token = ? AND pr.used = 0 LIMIT 1"
+                );        $stmt->execute([$token]);
         $reset_request = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($reset_request) {
@@ -35,8 +34,7 @@ if ($token) {
         // This will catch errors from new DateTime() or PDO
         $error_message = 'An unexpected error occurred. Please try again later.';
         // Optionally log the real error: error_log($e->getMessage());
-    }
-} else {
+    }} else {
     $error_message = 'No reset token provided.';
 }
 

@@ -39,7 +39,7 @@ function next_after_login(): string {
   } elseif ($role === 'staff') {
     return 'staff_dashboard.php';
   } else {
-    return 'my_bookings.php'; // A better default for customers
+    return 'index.php'; // Redirect to homepage after login
   }
 }
 

@@ -92,6 +92,10 @@ if (!$forceEmpty) {
         <article class="span-4 room-card">
           <a class="room-media" href="room.php?id=<?= $r['id'] ?>&<?= $guests ? 'guests='.$guests.'&' : '' ?>ci=<?= urlencode($ci) ?>&co=<?= urlencode($co) ?>">
             <img src="<?= htmlspecialchars($r['image_url'] ?: 'https://via.placeholder.com/1200x800?text=Room') ?>" alt="Room <?= htmlspecialchars($r['number']) ?>">
+            <div class="card-overlay"></div>
+            <div class="card-bar">
+              <div class="h3"><?= htmlspecialchars($r['type']) ?></div>
+            </div>
             <?php if ($r['avg_rating'] !== null): ?><span class="badge"><?= htmlspecialchars($r['avg_rating']) ?> ★</span><?php endif; ?>
           </a>
           <div class="room-body">

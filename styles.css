@@ -219,3 +219,25 @@ section{padding:48px 0}
 .kpi { text-align:center; padding:16px !important; }
 .kpi-num { font-size:28px; font-weight:700; }
 .kpi-label { color:#6b7280; font-size:12px; }
+
+/* --- Room Card Title Overlay --- */
+.card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0) 60%, rgba(0,0,0,.6) 100%);
+  z-index: 1;
+}
+.card-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 12px 16px;
+  color: #fff;
+  z-index: 2;
+}
+.card-bar .h3 {
+  color: #fff;
+  margin: 0;
+  font-size: 20px; /* Adjusted for smaller card */
+}

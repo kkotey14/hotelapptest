@@ -1,11 +1,29 @@
--- Consolidated HotelApp Database Schema and Seed Data
+-- Consolidated HotelApp Database Schema
+-- Version: 2.1
+-- Description: Corrected schema with proper drop order and all columns.
 
-SET FOREIGN_KEY_CHECKS = 0;
+SET NAMES utf8;
+SET time_zone = '+00:00';
+SET foreign_key_checks = 0;
+SET sql_mode = 'NO_AUTO_VALUE_ON_ZERO';
+
+--
+-- Drop Tables in reverse dependency order
+--
+DROP TABLE IF EXISTS `payments`;
+DROP TABLE IF EXISTS `reviews`;
+DROP TABLE IF EXISTS `room_photos`;
+DROP TABLE IF EXISTS `password_resets`;
+DROP TABLE IF EXISTS `Services_in_Booking`;
+DROP TABLE IF EXISTS `bookings`;
+DROP TABLE IF EXISTS `room_services`;
+DROP TABLE IF EXISTS `users`;
+DROP TABLE IF EXISTS `rooms`;
+DROP TABLE IF EXISTS `sessions`;
 
 --
 -- Table structure for table `users`
 --
-DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(80) NOT NULL,
@@ -22,7 +40,6 @@ CREATE TABLE `users` (
 --
 -- Table structure for table `rooms`
 --
-DROP TABLE IF EXISTS `rooms`;
 CREATE TABLE `rooms` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `number` varchar(10) NOT NULL,
@@ -41,7 +58,6 @@ CREATE TABLE `rooms` (
 --
 -- Table structure for table `bookings`
 --
-DROP TABLE IF EXISTS `bookings`;
 CREATE TABLE `bookings` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` int(11) NOT NULL,
@@ -62,7 +78,6 @@ CREATE TABLE `bookings` (
 --
 -- Table structure for table `payments`
 --
-DROP TABLE IF EXISTS `payments`;
 CREATE TABLE `payments` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `booking_id` int(11) NOT NULL,
@@ -79,7 +94,6 @@ CREATE TABLE `payments` (
 --
 -- Table structure for table `reviews`
 --
-DROP TABLE IF EXISTS `reviews`;
 CREATE TABLE `reviews` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `room_id` int(11) NOT NULL,
@@ -97,7 +111,6 @@ CREATE TABLE `reviews` (
 --
 -- Table structure for table `room_photos`
 --
-DROP TABLE IF EXISTS `room_photos`;
 CREATE TABLE `room_photos` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `room_id` int(11) NOT NULL,
@@ -113,16 +126,52 @@ CREATE TABLE `room_photos` (
 --
 -- Table structure for table `password_resets`
 --
-DROP TABLE IF EXISTS `password_resets`;
 CREATE TABLE `password_resets` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` int(11) NOT NULL,
   `token` varchar(255) NOT NULL UNIQUE,
   `expires_at` datetime NOT NULL,
+  `used` tinyint(1) NOT NULL DEFAULT 0,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `password_resets_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Table structure for table `room_services`
+--
+CREATE TABLE `room_services` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `price` decimal(10, 2) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Table structure for table `Services_in_Booking`
+--
+CREATE TABLE `Services_in_Booking` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `booking_id` int(11) NOT NULL,
+  `service_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `booking_id` (`booking_id`),
+  KEY `service_id` (`service_id`),
+  CONSTRAINT `fk_booking_services_booking` FOREIGN KEY (`booking_id`) REFERENCES `bookings` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_booking_services_service` FOREIGN KEY (`service_id`) REFERENCES `room_services` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Table structure for table `sessions`
+--
+CREATE TABLE `sessions` (
+  `session_id` varchar(128) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `data` text NOT NULL,
+  `last_accessed` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`session_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -147,16 +196,16 @@ INSERT INTO `room_photos` (`id`, `room_id`, `url`, `photo_type`, `caption`, `upl
 (9,18,'https://images.pexels.com/photos/6585755/pexels-photo-6585755.jpeg','bathroom',NULL,'2025-09-24 20:52:31'),
 (10,18,'https://images.pexels.com/photos/4890676/pexels-photo-4890676.jpeg','main',NULL,'2025-09-24 20:52:54');
 
-SET FOREIGN_KEY_CHECKS = 1;
+--
+-- Dumping data for table `room_services`
+--
+INSERT INTO `room_services` (`name`, `price`) VALUES
+('Back Massage', 45.00),
+('Full Body Massage', 85.00),
+('Manicure', 35.00),
+('Pedicure', 40.00),
+('Facial', 65.00),
+('Champagne', 55.00),
+('Handmade Cigar', 39.00);
 
---
--- Table structure for table `sessions`
---
-DROP TABLE IF EXISTS `sessions`;
-CREATE TABLE `sessions` (
-  `session_id` varchar(128) NOT NULL,
-  `user_id` int(11) DEFAULT NULL,
-  `data` text NOT NULL,
-  `last_accessed` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`session_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+SET foreign_key_checks = 1;

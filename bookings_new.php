@@ -4,22 +4,28 @@ ini_set('display_errors', 1);
 
 require 'db.php';
 require 'auth.php';
-require_role(['customer']);
+
+$can_process_booking = true;
+if (!is_logged_in()) {
+    header('Location: login.php');
+    exit;
+} else {
+    $user_role = $_SESSION['user']['role'] ?? '';
+    if ($user_role !== 'customer') {
+        $errors[] = 'Due to hotel policy, admin and staff are required to create a customer account to make reservations.';
+        $can_process_booking = false;
+    }
+}
+
 require 'header.php';
 
 function h($s) {
   return htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
 }
 
-$errors = [];
 $success = false;
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  if (!is_logged_in()) {
-    header('Location: login.php');
-    exit;
-  }
-
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $can_process_booking) {
   $room_id  = $_POST['room_id'] ?? '';
   $ci       = $_POST['ci'] ?? $_POST['check_in'] ?? '';
   $co       = $_POST['co'] ?? $_POST['check_out'] ?? '';
