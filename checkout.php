@@ -156,6 +156,9 @@ $total_cents = $nights * (int)$room['rate_cents'];
           <input type="hidden" name="ci" value="<?= htmlspecialchars($ci) ?>">
           <input type="hidden" name="co" value="<?= htmlspecialchars($co) ?>">
           <input type="hidden" name="guests" value="<?= (int)$guests ?>">
+          <?php foreach ($services_raw as $s): ?>
+            <input type="hidden" name="services[]" value="<?= htmlspecialchars($s) ?>">
+          <?php endforeach; ?>
           <button class="btn primary" type="submit">Confirm reservation</button>
           <a class="btn" href="rooms_list.php?ci=<?= urlencode($ci) ?>&co=<?= urlencode($co) ?>&guests=<?= (int)$guests ?>">Cancel</a>
         </form>
