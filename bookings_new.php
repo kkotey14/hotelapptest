@@ -75,6 +75,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
   }
 }
+
+// After saving booking to `bookings` table
+$booking_id = $pdo->lastInsertId();
+
+// Save selected services
+if (!empty($_GET['services']) && is_array($_GET['services'])) {
+    $stmt = $pdo->prepare("INSERT INTO Services_in_Booking (booking_id, service_id) VALUES (?, ?)");
+    foreach ($_GET['services'] as $s) {
+        // $s is currently in format "Service Name|Price"
+        // First insert into services table if not exists
+        list($name, $price) = explode('|', $s);
+        $price = floatval(str_replace(['U$', '$'], '', $price));
+        // Check if service already exists
+        $sv = $pdo->prepare("SELECT id FROM room_services WHERE name=? AND price=? LIMIT 1");
+        $sv->execute([$name, $price]);
+        $sid = $sv->fetchColumn();
+        if (!$sid) {
+            $ins = $pdo->prepare("INSERT INTO room_services (name, price) VALUES (?, ?)");
+            $ins->execute([$name, $price]);
+            $sid = $pdo->lastInsertId();
+        }
+        $stmt->execute([$booking_id, $sid]);
+    }
+}
+
 ?>
 
 <section class="container">

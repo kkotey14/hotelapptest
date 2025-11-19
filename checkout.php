@@ -10,6 +10,9 @@ $room_id = (int)($_GET['room_id'] ?? 0);
 $ci      = trim($_GET['ci'] ?? '');
 $co      = trim($_GET['co'] ?? '');
 $guests  = max(1, (int)($_GET['guests'] ?? 1));
+$services_raw = $_GET['services'] ?? [];   
+$services = [];                           
+$services_total = 0;  
 
 function valid_ymd($s){
   $dt = DateTime::createFromFormat('Y-m-d', $s);
@@ -68,6 +71,31 @@ if ($used >= $inventory) {
   require 'footer.php'; exit;
 }
 
+// Services calculation and display 
+foreach ($services_raw as $item) {
+    // item format: "Back Massage|U$45.00"
+    list($name, $priceStr) = explode('|', $item);
+
+    // Convert "U$45.00" → 45.00
+    $priceNum = floatval(str_replace(['U$', '$'], '', $priceStr));
+
+    // Add to cleaned array
+    $services[] = [
+        'name' => $name,
+        'price' => $priceNum,
+    ];
+
+    // Add to total
+    $services_total += $priceNum;
+}
+
+// Create checkout display line
+$services_summary = "";
+if (!empty($services)) {
+    $names = array_column($services, 'name');
+    $services_summary = implode(', ', $names) . " (Total: U$" . number_format($services_total, 2) . ")";
+}
+
 // ---- price estimate ----
 $nights = (new DateTime($ci))->diff(new DateTime($co))->days;
 $nights = max(1, $nights);
@@ -111,7 +139,16 @@ $total_cents = $nights * (int)$room['rate_cents'];
               $<?= number_format($total_cents/100, 2) ?> for <?= $nights ?> night<?= $nights>1?'s':'' ?>
             </td>
           </tr>
-        </table>
+          <?php if ($services_summary): ?>
+        <tr>
+          <td style="border:1px solid var(--line);padding:10px">Services</td>
+          <td style="border:1px solid var(--line);padding:10px">
+            <?= htmlspecialchars($services_summary) ?>
+          </td>
+        </tr>
+        <?php endif; ?>
+
+      </table>
 
         <form method="post" action="bookings_new.php" style="margin-top:14px;display:flex;gap:10px">
           <input type="hidden" name="confirm" value="1">

@@ -124,6 +124,20 @@ if ($is_admin && isset($_GET['all']) && $_GET['all']==='1') {
 }
 $bookings = $st->fetchAll(PDO::FETCH_ASSOC);
 
+// ---------- Fetch services for each booking ----------
+foreach ($bookings as &$b) {
+    $q = $pdo->prepare("
+        SELECT rs.name, rs.price
+        FROM Services_in_Booking sb
+        JOIN room_services rs ON sb.service_id = rs.id
+        WHERE sb.booking_id = ?
+    ");
+    $q->execute([$b['id']]);
+    $b['services'] = $q->fetchAll(PDO::FETCH_ASSOC);
+}
+unset($b); // break reference
+
+
 // helper to format dt
 function dt($s) {
   if (!$s) return '';
@@ -157,6 +171,7 @@ require_once __DIR__.'/header.php';
           <th style="text-align:left;padding:10px;border-bottom:1px solid var(--line)">Check-out</th>
           <th style="text-align:left;padding:10px;border-bottom:1px solid var(--line)">Nights</th>
           <th style="text-align:left;padding:10px;border-bottom:1px solid var(--line)">Status</th>
+          <th style="text-align:left;padding:10px;border-bottom:1px solid var(--line)">Services</th>
           <th style="text-align:left;padding:10px;border-bottom:1px solid var(--line);width:260px">Actions</th>
         </tr>
       </thead>
@@ -181,6 +196,14 @@ require_once __DIR__.'/header.php';
           <td style="padding:10px;border-top:1px solid var(--line)"><?= htmlspecialchars(dt($b['check_out'])) ?></td>
           <td style="padding:10px;border-top:1px solid var(--line)"><?= $nights ?></td>
           <td style="padding:10px;border-top:1px solid var(--line)"><?= htmlspecialchars($status) ?></td>
+          <td style="padding:10px;border-top:1px solid var(--line)">
+            <?php if (!empty($b['services'])): ?>
+               <?= implode(', ', array_column($b['services'], 'name')) ?>
+            <?php else: ?>
+              <span class="muted">None</span>
+            <?php endif; ?>
+          </td>
+
           <td style="padding:10px;border-top:1px solid var(--line)">
             <?php if ($can_extend): ?>
               <form method="post" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
