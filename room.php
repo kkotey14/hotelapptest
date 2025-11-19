@@ -145,8 +145,46 @@ $showDebug = (!empty($_GET['debug']) && $_GET['debug']=='1') ||
         <button class="btn primary" type="submit">Continue to checkout</button>
       </div>
 
+     
+      <div style="margin-top:20px;">
+        <div class="card" style="padding-bottom:12px;">
+          <h3 class="h3" style="margin:0 0 12px">Services</h3>
+
+          <?php
+            $services = [
+            ['name' => 'Back Massage', 'price' => 'U$45.00'],
+            ['name' => 'Full Body Massage', 'price' => 'U$85.00'],
+            ['name' => 'Manicure', 'price' => 'U$35.00'],
+            ['name' => 'Pedicure', 'price' => 'U$40.00'],
+            ['name' => 'Facial', 'price' => 'U$65.00'],
+            ['name' => 'Champagne', 'price' => 'U$55.00'],
+            ['name' => 'Handmade Cigar', 'price' => 'U$39.00'],
+          ];
+
+      foreach ($services as $service): ?>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <label style="display:flex;align-items:center;gap:10px;">
+            <input type="checkbox"
+           name="services[]"
+           value="<?= htmlspecialchars($service['name'] . '|' . $service['price']) ?>">
+           <?= htmlspecialchars($service['name']) ?>
+          </label>
+          <span style="color:#555;"><?= htmlspecialchars($service['price']) ?></span>
+        </div>
+
+      <?php endforeach; ?>
+
+    <div style="display:flex;gap:10px;align-items:end; margin-top:12px;">
+      <div style="flex:1"></div>
+        <button class="btn primary" type="submit">Add Services</button>
+      </div>
+    </div>
+  </div>
+
+
       <div id="reserveHint" class="tiny muted" style="margin-top:8px;display:none"></div>
     </form>
+
 
     <?php if ($gallery): ?>
       <div class="thumbs" style="margin-top:12px">
