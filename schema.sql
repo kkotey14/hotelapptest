@@ -174,38 +174,30 @@ CREATE TABLE `sessions` (
   PRIMARY KEY (`session_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `rooms`
---
-INSERT INTO `rooms` (`id`, `number`, `type`, `image_url`, `description`, `rate_cents`, `max_guests`, `inventory`, `floor`, `is_active`) VALUES
-(18,'101','Queen','https://images.pexels.com/photos/4890676/pexels-photo-4890676.jpeg','Cozy queen with city view',12999,2,1,1,1),
-(19,'102','King','https://images.pexels.com/photos/33495802/pexels-photo-33495802.jpeg','Spacious king room near lobby',15999,3,1,1,1),
-(20,'201','Suite','https://images.pexels.com/photos/2506990/pexels-photo-2506990.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2','One-bedroom suite, living area',21999,4,1,1,1),
-(21,'202','Double','https://images.pexels.com/photos/20276961/pexels-photo-20276961/free-photo-of-twin-room-hotel-london-mowbray-court-hotel-central-london.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2','Two doubles for families',13999,4,1,1,1);
-
---
--- Dumping data for table `room_photos`
---
-INSERT INTO `room_photos` (`id`, `room_id`, `url`, `photo_type`, `caption`, `uploaded_at`) VALUES
-(2,21,'https://images.pexels.com/photos/6585755/pexels-photo-6585755.jpeg','bathroom',NULL,'2025-09-24 20:48:40'),
-(4,21,'https://images.pexels.com/photos/20276961/pexels-photo-20276961.jpeg','main',NULL,'2025-09-24 20:49:48'),
-(5,20,'https://images.pexels.com/photos/17840522/pexels-photo-17840522.jpeg','bathroom',NULL,'2025-09-24 20:50:44'),
-(6,20,'https://images.pexels.com/photos/2506990/pexels-photo-2506990.jpeg','main',NULL,'2025-09-24 20:51:08'),
-(7,19,'https://images.pexels.com/photos/33495802/pexels-photo-33495802.jpeg','main',NULL,'2025-09-24 20:51:33'),
-(8,19,'https://images.pexels.com/photos/6585755/pexels-photo-6585755.jpeg','bathroom',NULL,'2025-09-24 20:52:14'),
-(9,18,'https://images.pexels.com/photos/6585755/pexels-photo-6585755.jpeg','bathroom',NULL,'2025-09-24 20:52:31'),
-(10,18,'https://images.pexels.com/photos/4890676/pexels-photo-4890676.jpeg','main',NULL,'2025-09-24 20:52:54');
-
---
--- Dumping data for table `room_services`
---
-INSERT INTO `room_services` (`name`, `price`) VALUES
-('Back Massage', 45.00),
-('Full Body Massage', 85.00),
-('Manicure', 35.00),
-('Pedicure', 40.00),
-('Facial', 65.00),
-('Champagne', 55.00),
-('Handmade Cigar', 39.00);
 
 SET foreign_key_checks = 1;
+
+--
+-- Dumping data for table `users`
+--
+INSERT INTO `users` (`name`, `email`, `role`, `password_hash`, `address`, `date_of_birth`) VALUES
+('John Doe', 'john.doe@example.com', 'customer', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '123 Main St, Anytown, USA', '1990-01-15'),
+('Jane Smith', 'jane.smith@example.com', 'customer', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '456 Oak Ave, Somewhere, USA', '1985-05-20'),
+('Peter Jones', 'peter.jones@example.com', 'customer', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '789 Pine St, Nowhere, USA', '1992-08-10'),
+('Mary Williams', 'mary.williams@example.com', 'customer', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '101 Maple Ave, Anywhere, USA', '1988-12-01'),
+('David Brown', 'david.brown@example.com', 'customer', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '212 Birch St, Elsewhere, USA', '1995-03-25'),
+('Susan Davis', 'susan.davis@example.com', 'customer', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '323 Cedar Ave, Overthere, USA', '1980-07-30'),
+('Michael Miller', 'michael.miller@example.com', 'customer', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '434 Elm St, Anytown, USA', '1998-11-12'),
+('Jennifer Wilson', 'jennifer.wilson@example.com', 'customer', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '545 Spruce Ave, Somewhere, USA', '1983-02-18'),
+('William Moore', 'william.moore@example.com', 'customer', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '656 Fir St, Nowhere, USA', '1991-06-05'),
+('Linda Taylor', 'linda.taylor@example.com', 'customer', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '767 Redwood Ave, Anywhere, USA', '1987-09-22'),
+('Richard Anderson', 'richard.anderson@example.com', 'customer', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '878 Sequoia St, Elsewhere, USA', '1993-04-14'),
+('Patricia Thomas', 'patricia.thomas@example.com', 'customer', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '989 Willow Ave, Overthere, USA', '1989-10-28'),
+('Charles Jackson', 'charles.jackson@example.com', 'customer', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '109 Cypress St, Anytown, USA', '1996-01-08'),
+('Barbara White', 'barbara.white@example.com', 'customer', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '210 Palm Ave, Somewhere, USA', '1984-05-16'),
+('Joseph Harris', 'joseph.harris@example.com', 'customer', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '321 Poplar St, Nowhere, USA', '1994-08-24'),
+('Sarah Martin', 'sarah.martin@example.com', 'customer', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '432 Aspen Ave, Anywhere, USA', '1986-11-03'),
+('Thomas Thompson', 'thomas.thompson@example.com', 'customer', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '543 Cherry St, Elsewhere, USA', '1997-02-09'),
+('Nancy Garcia', 'nancy.garcia@example.com', 'customer', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '654 Peach Ave, Overthere, USA', '1982-06-20'),
+('Daniel Martinez', 'daniel.martinez@example.com', 'customer', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '765 Plum St, Anytown, USA', '1999-09-01'),
+('Karen Robinson', 'karen.robinson@example.com', 'customer', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '876 Pear Ave, Somewhere, USA', '1981-12-31');

@@ -71,7 +71,11 @@ require 'header.php';
 
       <div style="margin-bottom:6px">
         <label class="tiny muted">Password</label>
-        <input class="input" type="password" name="password" required>
+        <input class="input" type="password" name="password" id="password" required>
+      </div>
+      <div style="margin-bottom:6px">
+        <input type="checkbox" onclick="showPassword()">
+        <label>Show Password</label>
       </div>
 
       <div style="display:flex;align-items:center;justify-content:space-between;margin:8px 0 14px">
@@ -81,6 +85,17 @@ require 'header.php';
         <button class="btn primary" type="submit">Login</button>
       </div>
     </form>
+    
+    <script>
+    function showPassword() {
+      var x = document.getElementById("password");
+      if (x.type === "password") {
+        x.type = "text";
+      } else {
+        x.type = "password";
+      }
+    }
+    </script>
 
     <div class="muted tiny" style="border-top:1px solid var(--line);padding-top:12px;margin-top:6px">
       No account? <a href="register.php">Create one</a>
