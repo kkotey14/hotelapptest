@@ -21,5 +21,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-header("Location: admin_dashboard.php");
+$redirect_to = $_SERVER['HTTP_REFERER'] ?? 'staff_dashboard.php';
+header("Location: $redirect_to");
 exit;

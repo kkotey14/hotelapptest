@@ -10,6 +10,8 @@ $is_admin = in_array($me['role'] ?? '', ['admin','staff'], true);
 
 $flash = $error = '';
 
+
+
 // ---------- POST: Cancel ----------
 if ($_SERVER['REQUEST_METHOD']==='POST' && isset($_POST['cancel_booking_id'])) {
   verify_csrf_token();

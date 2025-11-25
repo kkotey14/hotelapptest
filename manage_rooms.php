@@ -9,22 +9,7 @@ require_once __DIR__.'/header.php';
 function h($s){ return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
 function money($cents){ return '$'.number_format($cents/100, 2); }
 
-// Handle booking actions
-if ($_SERVER['REQUEST_METHOD']==='POST' && isset($_POST['booking_action'])) {
-  $action = $_POST['booking_action'];
-  $bid    = (int)($_POST['booking_id'] ?? 0);
 
-  if ($bid) {
-    if ($action==='cancel') {
-      $pdo->prepare("UPDATE bookings SET status='cancelled' WHERE id=?")->execute([$bid]);
-    } elseif ($action==='confirm') {
-      $pdo->prepare("UPDATE bookings SET status='confirmed' WHERE id=?")->execute([$bid]);
-    } elseif ($action==='delete') {
-      $pdo->prepare("DELETE FROM bookings WHERE id=?")->execute([$bid]);
-    }
-  }
-  header("Location: manage_rooms.php"); exit;
-}
 
 // Fetch all bookings with user and room info
 $sql = "
@@ -112,20 +97,23 @@ $rooms = $pdo->query("SELECT id, type, number, inventory, rate_cents, max_guests
             </td>
             <td class="tiny"><?= h($b['created_at']) ?></td>
             <td>
-              <form method="post" style="display:inline">
-                <input type="hidden" name="booking_action" value="confirm">
+              <form method="post" action="admin_booking_action.php" style="display:inline">
+                <?php csrf_input(); ?>
+                <input type="hidden" name="action" value="approve">
                 <input type="hidden" name="booking_id" value="<?= (int)$b['booking_id'] ?>">
                 <button class="btn tiny">Confirm</button>
               </form>
 
-              <form method="post" style="display:inline" onsubmit="return confirm('Cancel this booking?');">
-                <input type="hidden" name="booking_action" value="cancel">
+              <form method="post" action="admin_booking_action.php" style="display:inline" onsubmit="return confirm('Cancel this booking?');">
+                <?php csrf_input(); ?>
+                <input type="hidden" name="action" value="deny">
                 <input type="hidden" name="booking_id" value="<?= (int)$b['booking_id'] ?>">
                 <button class="btn tiny">Cancel</button>
               </form>
 
               <form method="post" style="display:inline" onsubmit="return confirm('Delete this booking permanently?');">
-                <input type="hidden" name="booking_action" value="delete">
+                <?php csrf_input(); ?>
+                <input type="hidden" name="action" value="delete">
                 <input type="hidden" name="booking_id" value="<?= (int)$b['booking_id'] ?>">
                 <button class="btn tiny">Delete</button>
               </form>
