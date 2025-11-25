@@ -45,21 +45,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $can_process_booking) {
     try {
         $pdo->beginTransaction();
 
-        $inventory = max(1, (int)$room['inventory']);
+        $room_stmt = $pdo->prepare("SELECT * FROM rooms WHERE id=? AND is_active=1 LIMIT 1");
+        $room_stmt->execute([$room_id]);
+        $room = $room_stmt->fetch(PDO::FETCH_ASSOC);
 
-        // Check overlapping bookings with a lock
-        $conflict = $pdo->prepare("
-            SELECT COUNT(*) FROM bookings
-            WHERE room_id = ? AND status IN ('pending','confirmed')
-            AND NOT (check_out <= ? OR check_in >= ?) FOR UPDATE
-        ");
-        $conflict->execute([$room_id, $ci, $co]);
-        $used = (int)$conflict->fetchColumn();
-
-        if ($used >= $inventory) {
-            $errors[] = 'Room is fully booked for the selected dates.';
-            $pdo->rollBack();
+        if (!$room) {
+            $errors[] = 'Room not found.';
+        } elseif ($guests > (int)$room['max_guests']) {
+            $errors[] = 'Too many guests for selected room.';
         } else {
+            $inventory = max(1, (int)$room['inventory']);
+
+            // Check overlapping bookings with a lock
+            $conflict = $pdo->prepare("
+                SELECT COUNT(*) FROM bookings
+                WHERE room_id = ? AND status IN ('pending','confirmed')
+                AND NOT (check_out <= ? OR check_in >= ?) FOR UPDATE
+            ");
+            $conflict->execute([$room_id, $ci, $co]);
+            $used = (int)$conflict->fetchColumn();
+
+            if ($used >= $inventory) {
+                $errors[] = 'Room is fully booked for the selected dates.';
+            }
+        }
+
+        if (empty($errors)) {
             $insert = $pdo->prepare("
                 INSERT INTO bookings (user_id, room_id, check_in, check_out, status)
                 VALUES (?, ?, ?, ?, 'pending')
@@ -80,6 +91,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $can_process_booking) {
                 $errors[] = 'Database error, please try again.';
                 $pdo->rollBack();
             }
+        } else {
+            $pdo->rollBack();
         }
     } catch (Exception $e) {
         $errors[] = 'An unexpected error occurred. Please try again.';
