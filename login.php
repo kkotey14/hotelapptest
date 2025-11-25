@@ -14,38 +14,59 @@ if (is_logged_in()) {
 $err = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = trim($_POST['email'] ?? '');
-    $pw    = $_POST['password'] ?? '';
+    // --- Rate Limiting ---
+    define('MAX_LOGIN_ATTEMPTS', 5);
+    define('LOGIN_ATTEMPT_WINDOW', 300); // 5 minutes
 
-    // Basic validation
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $err = 'Please enter a valid email address.';
-    } elseif ($pw === '') {
-        $err = 'Password is required.';
+    $ip = $_SERVER['REMOTE_ADDR'];
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM login_attempts WHERE ip_address = ? AND timestamp > DATE_SUB(NOW(), INTERVAL ? SECOND)");
+    $stmt->execute([$ip, LOGIN_ATTEMPT_WINDOW]);
+    $attempts = (int)$stmt->fetchColumn();
+
+    if ($attempts >= MAX_LOGIN_ATTEMPTS) {
+        $err = 'You have made too many login attempts. Please try again later.';
     } else {
-        // Fetch user by email
-        $stmt = $pdo->prepare("SELECT id, name, email, role, password_hash FROM users WHERE email = ? LIMIT 1");
-        $stmt->execute([$email]);
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        $email = trim($_POST['email'] ?? '');
+        $pw    = $_POST['password'] ?? '';
 
-        if ($user && password_verify($pw, $user['password_hash'])) {
-            // Store basic user info in session
-            $_SESSION['user'] = [
-                'id'    => $user['id'],
-                'name'  => $user['name'],
-                'email' => $user['email'],
-                'role'  => $user['role'],
-            ];
-
-            // Regenerate session ID to prevent session fixation
-            session_regenerate_id(true);
-
-            // Redirect using the centralized, role-aware function
-            header("Location: " . next_after_login());
-            exit;
+        // Basic validation
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $err = 'Please enter a valid email address.';
+        } elseif ($pw === '') {
+            $err = 'Password is required.';
         } else {
-            // Don't reveal what failed (email or password)
-            $err = 'Invalid email or password.';
+            // Fetch user by email
+            $stmt = $pdo->prepare("SELECT id, name, email, role, password_hash FROM users WHERE email = ? LIMIT 1");
+            $stmt->execute([$email]);
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($user && password_verify($pw, $user['password_hash'])) {
+                // Clear login attempts for this IP
+                $stmt = $pdo->prepare("DELETE FROM login_attempts WHERE ip_address = ?");
+                $stmt->execute([$ip]);
+
+                // Store basic user info in session
+                $_SESSION['user'] = [
+                    'id'    => $user['id'],
+                    'name'  => $user['name'],
+                    'email' => $user['email'],
+                    'role'  => $user['role'],
+                ];
+
+                // Regenerate session ID to prevent session fixation
+                session_regenerate_id(true);
+
+                // Redirect using the centralized, role-aware function
+                header("Location: " . next_after_login());
+                exit;
+            } else {
+                // Record failed login attempt
+                $stmt = $pdo->prepare("INSERT INTO login_attempts (ip_address, user_agent) VALUES (?, ?)");
+                $stmt->execute([$ip, $_SERVER['HTTP_USER_AGENT'] ?? '']);
+
+                // Don't reveal what failed (email or password)
+                $err = 'Invalid email or password.';
+            }
         }
     }
 }

@@ -71,22 +71,14 @@ if ($used >= $inventory) {
   require 'footer.php'; exit;
 }
 
-// Services calculation and display 
-foreach ($services_raw as $item) {
-    // item format: "Back Massage|U$45.00"
-    list($name, $priceStr) = explode('|', $item);
-
-    // Convert "U$45.00" → 45.00
-    $priceNum = floatval(str_replace(['U$', '$'], '', $priceStr));
-
-    // Add to cleaned array
-    $services[] = [
-        'name' => $name,
-        'price' => $priceNum,
-    ];
-
-    // Add to total
-    $services_total += $priceNum;
+// Services calculation and display
+if (!empty($services_raw)) {
+    $service_ids = array_map('intval', $services_raw);
+    $placeholders = rtrim(str_repeat('?,', count($service_ids)), ',');
+    $stmt = $pdo->prepare("SELECT * FROM room_services WHERE id IN ($placeholders)");
+    $stmt->execute($service_ids);
+    $services = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $services_total = array_sum(array_column($services, 'price'));
 }
 
 // Create checkout display line
@@ -151,13 +143,14 @@ $total_cents = $nights * (int)$room['rate_cents'];
       </table>
 
         <form method="post" action="bookings_new.php" style="margin-top:14px;display:flex;gap:10px">
+          <?php csrf_input(); ?>
           <input type="hidden" name="confirm" value="1">
           <input type="hidden" name="room_id" value="<?= (int)$room_id ?>">
           <input type="hidden" name="ci" value="<?= htmlspecialchars($ci) ?>">
           <input type="hidden" name="co" value="<?= htmlspecialchars($co) ?>">
           <input type="hidden" name="guests" value="<?= (int)$guests ?>">
-          <?php foreach ($services_raw as $s): ?>
-            <input type="hidden" name="services[]" value="<?= htmlspecialchars($s) ?>">
+          <?php foreach ($services as $s): ?>
+            <input type="hidden" name="services[]" value="<?= (int)$s['id'] ?>">
           <?php endforeach; ?>
           <button class="btn primary" type="submit">Confirm reservation</button>
           <a class="btn" href="rooms_list.php?ci=<?= urlencode($ci) ?>&co=<?= urlencode($co) ?>&guests=<?= (int)$guests ?>">Cancel</a>

@@ -26,6 +26,7 @@ function h($s) {
 $success = false;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $can_process_booking) {
+  verify_csrf_token();
   $room_id  = $_POST['room_id'] ?? '';
   $ci       = $_POST['ci'] ?? $_POST['check_in'] ?? '';
   $co       = $_POST['co'] ?? $_POST['check_out'] ?? '';
@@ -39,66 +40,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $can_process_booking) {
     $errors[] = 'Check-out date must be after check-in date.';
   }
 
-  // Fetch room + check inventory
+  // --- Transactional booking ---
   if (empty($errors)) {
-    $room = $pdo->prepare("SELECT * FROM rooms WHERE id=? AND is_active=1 LIMIT 1");
-    $room->execute([$room_id]);
-    $room = $room->fetch(PDO::FETCH_ASSOC);
+    try {
+        $pdo->beginTransaction();
 
-    if (!$room) {
-      $errors[] = 'Room not found.';
-    } elseif ($guests > (int)$room['max_guests']) {
-      $errors[] = 'Too many guests for selected room.';
-    } else {
-      $inventory = max(1, (int)$room['inventory']);
+        $inventory = max(1, (int)$room['inventory']);
 
-      // Check overlapping bookings
-      $conflict = $pdo->prepare("
-        SELECT COUNT(*) FROM bookings
-        WHERE room_id = ? AND status IN ('pending','confirmed')
-        AND NOT (check_out <= ? OR check_in >= ?)
-      ");
-      $conflict->execute([$room_id, $ci, $co]);
-      $used = (int)$conflict->fetchColumn();
+        // Check overlapping bookings with a lock
+        $conflict = $pdo->prepare("
+            SELECT COUNT(*) FROM bookings
+            WHERE room_id = ? AND status IN ('pending','confirmed')
+            AND NOT (check_out <= ? OR check_in >= ?) FOR UPDATE
+        ");
+        $conflict->execute([$room_id, $ci, $co]);
+        $used = (int)$conflict->fetchColumn();
 
-      if ($used >= $inventory) {
-        $errors[] = 'Room is fully booked for the selected dates.';
-      }
-    }
-  }
+        if ($used >= $inventory) {
+            $errors[] = 'Room is fully booked for the selected dates.';
+            $pdo->rollBack();
+        } else {
+            $insert = $pdo->prepare("
+                INSERT INTO bookings (user_id, room_id, check_in, check_out, status)
+                VALUES (?, ?, ?, ?, 'pending')
+            ");
+            if ($insert->execute([$user_id, $room_id, $ci, $co])) {
+                $success = true;
+                $booking_id = $pdo->lastInsertId();
 
-  // --- Insert booking ---
-  if (empty($errors)) {
-    $insert = $pdo->prepare("
-      INSERT INTO bookings (user_id, room_id, check_in, check_out, status)
-      VALUES (?, ?, ?, ?, 'pending')
-    ");
-    if ($insert->execute([$user_id, $room_id, $ci, $co])) {
-      $success = true;
-      $booking_id = $pdo->lastInsertId();
-
-      // Save selected services
-      if (!empty($_POST['services']) && is_array($_POST['services'])) {
-          $stmt = $pdo->prepare("INSERT INTO Services_in_Booking (booking_id, service_id) VALUES (?, ?)");
-          foreach ($_POST['services'] as $s) {
-              // $s is currently in format "Service Name|Price"
-              // First insert into services table if not exists
-              list($name, $price) = explode('|', $s);
-              $price = floatval(str_replace(['U$', '$'], '', $price));
-              // Check if service already exists
-              $sv = $pdo->prepare("SELECT id FROM room_services WHERE name=? AND price=? LIMIT 1");
-              $sv->execute([$name, $price]);
-              $sid = $sv->fetchColumn();
-              if (!$sid) {
-                  $ins = $pdo->prepare("INSERT INTO room_services (name, price) VALUES (?, ?)");
-                  $ins->execute([$name, $price]);
-                  $sid = $pdo->lastInsertId();
-              }
-              $stmt->execute([$booking_id, $sid]);
-          }
-      }
-    } else {
-      $errors[] = 'Database error, please try again.';
+                // Save selected services
+                if (!empty($_POST['services']) && is_array($_POST['services'])) {
+                    $stmt = $pdo->prepare("INSERT INTO Services_in_Booking (booking_id, service_id) VALUES (?, ?)");
+                    foreach ($_POST['services'] as $service_id) {
+                        $stmt->execute([$booking_id, (int)$service_id]);
+                    }
+                }
+                $pdo->commit();
+            } else {
+                $errors[] = 'Database error, please try again.';
+                $pdo->rollBack();
+            }
+        }
+    } catch (Exception $e) {
+        $errors[] = 'An unexpected error occurred. Please try again.';
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
     }
   }
 }

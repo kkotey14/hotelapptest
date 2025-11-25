@@ -20,6 +20,7 @@ DROP TABLE IF EXISTS `room_services`;
 DROP TABLE IF EXISTS `users`;
 DROP TABLE IF EXISTS `rooms`;
 DROP TABLE IF EXISTS `sessions`;
+DROP TABLE IF EXISTS `login_attempts`;
 
 --
 -- Table structure for table `users`
@@ -177,6 +178,15 @@ CREATE TABLE `sessions` (
 
 SET foreign_key_checks = 1;
 
+CREATE TABLE `login_attempts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `ip_address` varchar(45) NOT NULL,
+  `timestamp` timestamp NOT NULL DEFAULT current_timestamp(),
+  `user_agent` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `ip_address` (`ip_address`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 --
 -- Dumping data for table `users`
 --
@@ -200,4 +210,35 @@ INSERT INTO `users` (`name`, `email`, `role`, `password_hash`, `address`, `date_
 ('Thomas Thompson', 'thomas.thompson@example.com', 'customer', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '543 Cherry St, Elsewhere, USA', '1997-02-09'),
 ('Nancy Garcia', 'nancy.garcia@example.com', 'customer', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '654 Peach Ave, Overthere, USA', '1982-06-20'),
 ('Daniel Martinez', 'daniel.martinez@example.com', 'customer', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '765 Plum St, Anytown, USA', '1999-09-01'),
-('Karen Robinson', 'karen.robinson@example.com', 'customer', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '876 Pear Ave, Somewhere, USA', '1981-12-31');
+('Karen Robinson', 'karen.robinson@example.com', 'customer', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '876 Pear Ave, Somewhere, USA', '1981-12-31'),
+('Admin User', 'admin@example.com', 'admin', '$2y$10$RrMbSEFmfFpALUQ/oZ0/8evJT1e0/vYo0aBnB3MycocP8wpGz3d6W', NULL, NULL);
+
+--
+-- Dumping data for table `rooms`
+--
+INSERT INTO `rooms` (`id`, `number`, `type`, `image_url`, `description`, `rate_cents`, `max_guests`, `inventory`, `floor`, `is_active`) VALUES
+(18,'101','Queen','https://images.pexels.com/photos/4890676/pexels-photo-4890676.jpeg','Cozy queen with city view',12999,2,1,1,1),
+(19,'102','King','https://images.pexels.com/photos/33495802/pexels-photo-33495802.jpeg','Spacious king room near lobby',15999,3,1,1,1),
+(20,'201','Suite','https://images.pexels.com/photos/2506990/pexels-photo-2506990.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2','One-bedroom suite, living area',21999,4,1,1,1),
+(21,'202','Double','https://images.pexels.com/photos/20276961/pexels-photo-20276961/free-photo-of-twin-room-hotel-london-mowbray-court-hotel-central-london.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2','Two doubles for families',13999,4,1,1,1);
+
+--
+-- Dumping data for table `room_photos`
+--
+LOCK TABLES `room_photos` WRITE;
+/*!40000 ALTER TABLE `room_photos` DISABLE KEYS */;
+INSERT INTO `room_photos` VALUES (2,21,'https://images.pexels.com/photos/6585755/pexels-photo-6585755.jpeg','bathroom',NULL,'2025-09-24 20:48:40'),(4,21,'https://images.pexels.com/photos/20276961/pexels-photo-20276961.jpeg','main',NULL,'2025-09-24 20:49:48'),(5,20,'https://images.pexels.com/photos/17840522/pexels-photo-17840522.jpeg','bathroom',NULL,'2025-09-24 20:50:44'),(6,20,'https://images.pexels.com/photos/2506990/pexels-photo-2506990.jpeg','main',NULL,'2025-09-24 20:51:08'),(7,19,'https://images.pexels.com/photos/33495802/pexels-photo-33495802.jpeg','main',NULL,'2025-09-24 20:51:33'),(8,19,'https://images.pexels.com/photos/6585755/pexels-photo-6585755.jpeg','bathroom',NULL,'2025-09-24 20:52:14'),(9,18,'https://images.pexels.com/photos/6585755/pexels-photo-6585755.jpeg','bathroom',NULL,'2025-09-24 20:52:31'),(10,18,'https://images.pexels.com/photos/4890676/pexels-photo-4890676.jpeg','main',NULL,'2025-09-24 20:52:54');
+/*!40000 ALTER TABLE `room_photos` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Dumping data for table `room_services`
+--
+INSERT INTO `room_services` (`name`, `price`) VALUES
+('Back Massage', 45.00),
+('Full Body Massage', 85.00),
+('Manicure', 35.00),
+('Pedicure', 40.00),
+('Facial', 65.00),
+('Champagne', 55.00),
+('Handmade Cigar', 39.00);

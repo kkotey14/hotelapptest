@@ -3,6 +3,7 @@
 <?php
 // Admin create
 if ($_SERVER['REQUEST_METHOD']==='POST' && !empty($_SESSION['user']) && in_array($_SESSION['user']['role'], ['admin','staff'])) {
+  verify_csrf_token();
   $number = trim($_POST['number'] ?? '');
   $type   = trim($_POST['type'] ?? '');
   $rate   = (float)($_POST['rate'] ?? 0);
@@ -26,32 +27,32 @@ $guests = isset($_GET['guests']) && (int)$_GET['guests'] > 0 ? (int)$_GET['guest
 // If guests > 5 → no rooms by policy
 $forceEmpty = ($guests && $guests > 5);
 
-// Build room query (filter by guests if provided and not forced empty)
+// Build room query
+$sql = "
+  SELECT r.*, rev.avg_rating, rev.review_count
+  FROM rooms r
+  LEFT JOIN (
+      SELECT room_id, ROUND(AVG(rating),1) AS avg_rating, COUNT(*) AS review_count
+      FROM reviews
+      GROUP BY room_id
+  ) rev ON r.id = rev.room_id
+  WHERE r.is_active=1
+";
+
+$params = [];
+if ($guests) {
+    $sql .= " AND r.max_guests >= ?";
+    $params[] = $guests;
+}
+
+$sql .= " ORDER BY r.id DESC";
+
 if (!$forceEmpty) {
-  if ($guests) {
-    $q = $pdo->prepare("
-      SELECT r.*,
-            (SELECT ROUND(AVG(rating),1) FROM reviews WHERE room_id=r.id) AS avg_rating,
-            (SELECT COUNT(*) FROM reviews WHERE room_id=r.id) AS review_count
-      FROM rooms r
-      WHERE r.is_active=1
-        AND r.max_guests >= ?
-      ORDER BY r.id DESC
-    ");
-    $q->execute([$guests]);
-  } else {
-    $q = $pdo->query("
-      SELECT r.*,
-            (SELECT ROUND(AVG(rating),1) FROM reviews WHERE room_id=r.id) AS avg_rating,
-            (SELECT COUNT(*) FROM reviews WHERE room_id=r.id) AS review_count
-      FROM rooms r
-      WHERE r.is_active=1
-      ORDER BY r.id DESC
-    ");
-  }
-  $rooms = $q->fetchAll(PDO::FETCH_ASSOC);
+    $q = $pdo->prepare($sql);
+    $q->execute($params);
+    $rooms = $q->fetchAll(PDO::FETCH_ASSOC);
 } else {
-  $rooms = [];
+    $rooms = [];
 }
 ?>
 <section class="container">
@@ -131,6 +132,7 @@ if (!$forceEmpty) {
   <div class="card">
     <h2 class="h2">Add a Room</h2>
     <form method="post" class="grid">
+      <?php csrf_input(); ?>
       <div class="span-4"><label>Number<input class="input" name="number" required></label></div>
       <div class="span-4"><label>Type<input class="input" name="type" placeholder="Queen, King, Suite" required></label></div>
       <div class="span-4"><label>Rate (USD/night)<input class="input" name="rate" type="number" step="0.01" required></label></div>

@@ -151,25 +151,18 @@ $showDebug = (!empty($_GET['debug']) && $_GET['debug']=='1') ||
           <h3 class="h3" style="margin:0 0 12px">Services</h3>
 
           <?php
-            $services = [
-            ['name' => 'Back Massage', 'price' => 'U$45.00'],
-            ['name' => 'Full Body Massage', 'price' => 'U$85.00'],
-            ['name' => 'Manicure', 'price' => 'U$35.00'],
-            ['name' => 'Pedicure', 'price' => 'U$40.00'],
-            ['name' => 'Facial', 'price' => 'U$65.00'],
-            ['name' => 'Champagne', 'price' => 'U$55.00'],
-            ['name' => 'Handmade Cigar', 'price' => 'U$39.00'],
-          ];
+            $services_stmt = $pdo->query("SELECT * FROM room_services ORDER BY name");
+            $services = $services_stmt->fetchAll(PDO::FETCH_ASSOC);
 
       foreach ($services as $service): ?>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
           <label style="display:flex;align-items:center;gap:10px;">
             <input type="checkbox"
            name="services[]"
-           value="<?= htmlspecialchars($service['name'] . '|' . $service['price']) ?>">
+           value="<?= htmlspecialchars($service['id']) ?>">
            <?= htmlspecialchars($service['name']) ?>
           </label>
-          <span style="color:#555;"><?= htmlspecialchars($service['price']) ?></span>
+          <span style="color:#555;"><?= htmlspecialchars('U$' . number_format($service['price'], 2)) ?></span>
         </div>
 
       <?php endforeach; ?>
@@ -234,6 +227,7 @@ $showDebug = (!empty($_GET['debug']) && $_GET['debug']=='1') ||
     <h3 class="h3" style="margin:0 0 12px">Reviews</h3>
     <?php if (!empty($_SESSION['user'])): ?>
       <form method="post" class="reviewForm" action="room_review_add.php?id=<?= (int)$room['id'] ?>" style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start">
+        <?php csrf_input(); ?>
         <label>Rating
           <select name="rating" class="input" required>
             <option value="">Select…</option>

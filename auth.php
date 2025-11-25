@@ -24,11 +24,13 @@ function next_after_login(): string {
     $target = $_SESSION['redirect_after_login'];
     unset($_SESSION['redirect_after_login']);
 
-    // Prevent open redirects
-    if (preg_match('~^(https?:)?//~i', $target) || strpos($target, "\n") !== false || strpos($target, "\r") !== false) {
-        // Fallback to role-based default if target is invalid
+    // Prevent open redirects by only allowing relative paths
+    $url_parts = parse_url($target);
+    if (isset($url_parts['host']) || isset($url_parts['scheme'])) {
+        // Fallback to role-based default if target is an absolute URL
     } else {
-        return ltrim($target, '/');
+        $path = $url_parts['path'] ?? 'index.php';
+        return $path !== '' ? $path : 'index.php';
     }
   }
 
@@ -103,7 +105,9 @@ function csrf_input(): void {
  */
 function verify_csrf_token(): void {
     if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'] ?? '', $_POST['csrf_token'])) {
-        http_response_code(403);
-        die('CSRF token validation failed.');
+        // In a real application, you would log this error
+        // error_log('CSRF token validation failed.');
+        header("Location: error.php");
+        exit;
     }
 }
