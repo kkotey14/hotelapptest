@@ -19,3 +19,19 @@ config.php
 /vendor/
 /node_modules/
 /cache/
+
+# Local history
+.lh/
+
+# Dependencies (PHP / Composer)
+vendor/
+
+# Environment / secrets
+.env
+config.php
+
+# OS files
+.DS_Store
+
+# Logs
+*.log
