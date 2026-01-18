@@ -36,14 +36,14 @@
     <p>Our website may use cookies to improve usability. You can disable cookies in your browser settings, but some features may not function properly.</p>
 
     <h2 class="h3">6. Your Rights</h2>
-    <p>You may request to access, update, or delete your personal information by contacting us at <a href="mailto:reservations@example.com">reservations@example.com</a>.</p>
+    <p>You may request to access, update, or delete your personal information by contacting us at <a href="mailto:thereservation123@gmail.com">thereservation123@gmail.com</a>.</p>
 
     <h2 class="h3">7. Contact Us</h2>
     <p>If you have questions about this Privacy Policy, please contact us at:</p>
     <p>
       <?= htmlspecialchars(HOTEL_NAME) ?><br>
       353 Main Ave, Norwalk, CT 06851<br>
-      reservations@example.com<br>
+      thereservation123@gmail.com<br>
       (203) 555-0123
     </p>
   </div>

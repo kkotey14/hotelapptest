@@ -6,7 +6,7 @@
       <div class="brand brand--footer">
         <span class="brand-name"><?= htmlspecialchars(HOTEL_NAME) ?></span>
       </div>
-      <p class="muted">353 Main Ave, Norwalk, CT · reservations@example.com · (203) 555-0123</p>
+      <p class="muted">353 Main Ave, Norwalk, CT · thereservation123@gamil.com · (203) 555-0123</p>
     </div>
 
     <nav class="footer-links">
