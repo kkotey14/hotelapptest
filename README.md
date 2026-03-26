@@ -58,12 +58,6 @@ Designed to streamline hotel operations with **multi-role authentication** for G
 
 ![Find your stay section](./hotel-app5.png)
 
-### Explore
-
-![Explore section](./hotel-app6.png)
-
----
-
 ##  Local Setup
 
 ### 1) Clone the repository
