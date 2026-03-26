@@ -36,6 +36,34 @@ Designed to streamline hotel operations with **multi-role authentication** for G
 
 ---
 
+## Screenshots
+
+### Login
+
+![Login page](./hotel-app1.png)
+
+### My Bookings
+
+![My Bookings page](./hotel-app2.png)
+
+### Admin Dashboard
+
+![Admin dashboard](./hotel-app3.png)
+
+### Admin Users
+
+![Admin users page](./hotel-app4.png)
+
+### Find Your Stay
+
+![Find your stay section](./hotel-app5.png)
+
+### Explore
+
+![Explore section](./hotel-app6.png)
+
+---
+
 ##  Local Setup
 
 ### 1) Clone the repository
